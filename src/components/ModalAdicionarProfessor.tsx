@@ -10,14 +10,12 @@ interface ModalProps {
 
 export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps) {
   const [enviado, setEnviado] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    sala: '',
-    passaLista: 'Sempre',
-    dificuldade: 'Médio',
-    resumo: '',
-  });
+  const [dificuldade, setDificuldade] = useState('Médio');
+  const [passaLista, setPassaLista] = useState('Sempre');
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [sala, setSala] = useState('');
+  const [resumo, setResumo] = useState('');
 
   if (!isOpen) return null;
 
@@ -26,12 +24,12 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
 
     const { error } = await supabase.from('professores').insert([
       {
-        nome: formData.nome,
-        email: formData.email,
-        sala: formData.sala,
-        passa_lista: formData.passaLista,
-        dificuldade: formData.dificuldade,
-        resumo: formData.resumo,
+        nome,
+        email,
+        sala,
+        passa_lista: passaLista,
+        dificuldade,
+        resumo,
         status: 'pendente',
       },
     ]);
@@ -53,13 +51,15 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
   const opcoesPresenca = ['Nunca', 'Às vezes', 'Sempre', 'Passa lista'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm pointer-events-auto">
+      <div 
+        className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto z-50"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold cursor-pointer"
+          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold cursor-pointer z-50 p-2"
         >
           ✕
         </button>
@@ -92,8 +92,8 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                   type="text"
                   required
                   placeholder="Ex: Fausto De Camargo Júnior"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                 />
               </div>
@@ -106,8 +106,8 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                   <input
                     type="email"
                     placeholder="exemplo@cefetmg.br"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                   />
                 </div>
@@ -119,8 +119,8 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                   <input
                     type="text"
                     placeholder="Ex: Sala 204 - Prédio 2"
-                    value={formData.sala}
-                    onChange={(e) => setFormData({ ...formData, sala: e.target.value })}
+                    value={sala}
+                    onChange={(e) => setSala(e.target.value)}
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                   />
                 </div>
@@ -131,17 +131,17 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
                   Nível de Exigência *
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 relative z-10">
                   {opcoesDificuldade.map((opcao) => {
-                    const ativo = formData.dificuldade === opcao;
+                    const ativo = dificuldade === opcao;
                     return (
                       <button
                         key={opcao}
                         type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, dificuldade: opcao }))}
-                        className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        onClick={() => setDificuldade(opcao)}
+                        className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none relative z-20 ${
                           ativo
-                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.15)]'
+                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.2)]'
                             : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
                         }`}
                       >
@@ -157,17 +157,17 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
                   Cobra Presença *
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 relative z-10">
                   {opcoesPresenca.map((opcao) => {
-                    const ativo = formData.passaLista === opcao;
+                    const ativo = passaLista === opcao;
                     return (
                       <button
                         key={opcao}
                         type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, passaLista: opcao }))}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                        onClick={() => setPassaLista(opcao)}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer select-none relative z-20 ${
                           ativo
-                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.15)]'
+                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.2)]'
                             : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
                         }`}
                       >
@@ -185,8 +185,8 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 <textarea
                   rows={2}
                   placeholder="Ex: Cobra muita teoria nas provas, dá ponto por participação, etc."
-                  value={formData.resumo}
-                  onChange={(e) => setFormData({ ...formData, resumo: e.target.value })}
+                  value={resumo}
+                  onChange={(e) => setResumo(e.target.value)}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none resize-none"
                 />
               </div>
@@ -194,7 +194,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer relative z-20"
                 >
                   Enviar para Moderação
                 </button>
