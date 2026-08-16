@@ -8,10 +8,11 @@ interface Material {
   id: string;
   titulo: string;
   disciplina: string;
-  professor: string;
+  professor?: string;
   tipo: string;
   link_drive: string;
   observacoes?: string;
+  descricao?: string;
   created_at: string;
 }
 
@@ -23,15 +24,22 @@ export default function PaginaMateriais() {
   useEffect(() => {
     async function buscarMateriais() {
       setCarregando(true);
-      // Busca apenas materiais com status 'aprovado'
+      // Busca materiais aprovados da tabela 'materiais' ou 'contribuicoes'
       const { data, error } = await supabase
-        .from('contribuicoes')
+        .from('materiais')
         .select('*')
         .eq('status', 'aprovado')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Erro ao carregar materiais:', error);
+        // Fallback caso sua tabela no banco se chame 'contribuicoes'
+        const { data: dataContrib } = await supabase
+          .from('contribuicoes')
+          .select('*')
+          .eq('status', 'aprovado')
+          .order('created_at', { ascending: false });
+
+        setMateriais(dataContrib || []);
       } else {
         setMateriais(data || []);
       }
@@ -41,17 +49,17 @@ export default function PaginaMateriais() {
     buscarMateriais();
   }, []);
 
-  const materiaisFiltrados = filtroTipo === 'Todos'
-    ? materiais
-    : materiais.filter(m => m.tipo === filtroTipo);
+  const materiaisFiltrados =
+    filtroTipo === 'Todos'
+      ? materiais
+      : materiais.filter((m) => m.tipo === filtroTipo);
 
   return (
     <div className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 w-full max-w-full overflow-x-hidden box-border">
       <div className="max-w-5xl mx-auto w-full">
-        
         {/* Botão Voltar */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-borda text-xs font-semibold text-azul-texto hover:border-azul-texto transition-all mb-6 active:scale-95"
         >
           &larr; Voltar ao Início
@@ -70,11 +78,18 @@ export default function PaginaMateriais() {
         {/* Filtros */}
         <div className="w-full overflow-x-auto pb-3 mb-6 scrollbar-none">
           <div className="flex items-center space-x-2 min-w-max">
-            {['Todos', 'Prova', 'Lista de Exercícios', 'Trabalho', 'Gabarito', 'Material Didático'].map((tipo) => (
+            {[
+              'Todos',
+              'Prova',
+              'Lista de Exercícios',
+              'Trabalho',
+              'Gabarito',
+              'Material Didático',
+            ].map((tipo) => (
               <button
                 key={tipo}
                 onClick={() => setFiltroTipo(tipo)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   filtroTipo === tipo
                     ? 'bg-destaque text-white shadow-md'
                     : 'bg-card border border-borda text-texto-secundario hover:text-texto-principal'
@@ -98,36 +113,48 @@ export default function PaginaMateriais() {
                 key={item.id}
                 className="bg-card border border-borda rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-azul-texto/40 transition-all w-full box-border"
               >
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-1.5">
+                    {/* Badge do Tipo de Material */}
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-azul-texto border border-blue-500/20">
                       {item.tipo}
                     </span>
+
+                    {/* Nome da Disciplina */}
                     <span className="text-xs font-semibold text-texto-principal">
                       {item.disciplina}
                     </span>
-                    <span className="text-xs text-texto-secundario">
-                      • Prof. {item.professor}
-                    </span>
+
+                    {/* 🚀 BADGE/TAG DO PROFESSOR (se existir) */}
+                    {item.professor && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                        👨‍🏫 {item.professor}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Título do Material */}
                   <h2 className="text-xs sm:text-sm font-bold text-texto-principal">
                     {item.titulo}
                   </h2>
-                  {item.observacoes && (
+
+                  {/* Observações ou Descrição */}
+                  {(item.observacoes || item.descricao) && (
                     <p className="text-[11px] text-texto-secundario italic">
-                      Obs: {item.observacoes}
+                      Obs: {item.observacoes || item.descricao}
                     </p>
                   )}
                 </div>
 
-                    <a
-                    href={item.link_drive}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-4 py-2 bg-borda/60 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg text-center transition-all inline-flex items-center justify-center gap-1.5"
-                    >
-                    Abrir Material ↗
-                    </a>
+                {/* Botão de Acesso */}
+                <a
+                  href={item.link_drive}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-4 py-2 bg-borda/60 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg text-center transition-all inline-flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  Abrir Material ↗
+                </a>
               </div>
             ))}
           </div>
@@ -136,7 +163,6 @@ export default function PaginaMateriais() {
             Nenhum material aprovado encontrado para a categoria "{filtroTipo}".
           </div>
         )}
-
       </div>
     </div>
   );
