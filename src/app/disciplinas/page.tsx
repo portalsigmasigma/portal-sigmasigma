@@ -45,22 +45,30 @@ export default function DisciplinasPage() {
     setLoading(false);
   }
 
-  const handleCriarDisciplina = async (e: React.FormEvent) => {
+const handleCriarDisciplina = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!novoNome.trim() || !novoCodigo.trim()) return;
 
     setEnviando(true);
 
-    const novaDisciplina = {
+    // Monta o objeto omitindo campos vazios opcionais
+    const novaDisciplina: Record<string, any> = {
       nome: novoNome.trim(),
       codigo: novoCodigo.trim().toUpperCase(),
-      periodo: novoPeriodo || null,
-      ementa: novaEmenta.trim() || null,
     };
 
-    const { error } = await supabase.from('disciplinas').insert([novaDisciplina]);
+    if (novoPeriodo) novaDisciplina.periodo = novoPeriodo;
+    if (novaEmenta.trim()) novaDisciplina.ementa = novaEmenta.trim();
 
-    if (!error) {
+    const { data, error } = await supabase
+      .from('disciplinas')
+      .insert([novaDisciplina])
+      .select();
+
+    if (error) {
+      console.error('Erro detalhado do Supabase:', error);
+      alert(`Erro ao cadastrar disciplina (Código ${error.code}): ${error.message}\n${error.details || ''}`);
+    } else {
       alert('Disciplina cadastrada com sucesso!');
       setNovoNome('');
       setNovoCodigo('');
@@ -68,13 +76,10 @@ export default function DisciplinasPage() {
       setNovaEmenta('');
       setIsModalOpen(false);
       fetchDisciplinas();
-    } else {
-      alert('Erro ao cadastrar disciplina: ' + error.message);
     }
 
     setEnviando(false);
   };
-
   // Filtragem local por texto e período
   const disciplinasFiltradas = disciplinas.filter((d) => {
     const atendeBusca =
