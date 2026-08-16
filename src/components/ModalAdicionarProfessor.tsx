@@ -26,8 +26,8 @@ export default function ModalAdicionarProfessor({
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [sala, setSala] = useState('');
-  const [dificuldade, setDificuldade] = useState('Médio');
-  const [passaLista, setPassaLista] = useState('Sempre');
+  const [dificuldade, setDificuldade] = useState('');
+  const [passaLista, setPassaLista] = useState('');
   const [dicas, setDicas] = useState('');
 
   // Estados para Associação de Matéria
@@ -69,8 +69,8 @@ export default function ModalAdicionarProfessor({
       nome: nome.trim(),
       email: email.trim() || null,
       sala: sala.trim() || null,
-      dificuldade,
-      passa_lista: passaLista,
+      dificuldade: dificuldade || null,
+      passa_lista: passaLista || null,
       dicas: dicas.trim() || null,
       materia: materiaFinal || null,
       status: 'aprovado',
@@ -84,8 +84,8 @@ export default function ModalAdicionarProfessor({
       setNome('');
       setEmail('');
       setSala('');
-      setDificuldade('Médio');
-      setPassaLista('Sempre');
+      setDificuldade('');
+      setPassaLista('');
       setDicas('');
       setMateriaSelecionada('');
       setMateriaManual('');
@@ -114,15 +114,16 @@ export default function ModalAdicionarProfessor({
           </div>
           <button
             onClick={onClose}
+            type="button"
             className="text-texto-secundario hover:text-texto-principal text-sm p-1 rounded-lg transition-colors"
           >
             ✕
           </button>
         </div>
 
-        {/* Formulário com todos os campos mantidos */}
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Nome */}
+          {/* 1. Nome do Docente (Obrigatório) */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Nome do Docente *
@@ -137,83 +138,8 @@ export default function ModalAdicionarProfessor({
             />
           </div>
 
-          {/* Email e Sala */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                E-mail de Contato
-              </label>
-              <input
-                type="email"
-                placeholder="exemplo@cefetmg.br"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                Sala / Prédio
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Sala 204 - Prédio 2"
-                value={sala}
-                onChange={(e) => setSala(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Nível de Exigência */}
+          {/* 2. Relacionar a uma Matéria Cadastrada (Movido para logo abaixo do nome) */}
           <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-              Nível de Exigência *
-            </label>
-            <select
-              value={dificuldade}
-              onChange={(e) => setDificuldade(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
-            >
-              <option value="Tranquilo">Tranquilo</option>
-              <option value="Médio">Médio</option>
-              <option value="Exigente">Exigente</option>
-            </select>
-          </div>
-
-          {/* Cobra Presença */}
-          <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-              Cobra Presença *
-            </label>
-            <select
-              value={passaLista}
-              onChange={(e) => setPassaLista(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
-            >
-              <option value="Sempre">Sempre</option>
-              <option value="Às vezes">Às vezes</option>
-              <option value="Raramente">Raramente</option>
-              <option value="Não cobra">Não cobra</option>
-            </select>
-          </div>
-
-          {/* Dicas e Visão Geral */}
-          <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-              Dicas e Visão Geral <span className="font-normal">(opcional)</span>
-            </label>
-            <textarea
-              rows={2}
-              placeholder="Ex: Cobra muita teoria nas provas, dá ponto por participação, etc."
-              value={dicas}
-              onChange={(e) => setDicas(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none resize-y"
-            />
-          </div>
-
-          {/* NOVO CAMPO: Relacionar Matéria Cadastrada */}
-          <div className="pt-1">
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Relacionar a uma Matéria Cadastrada <span className="font-normal">(opcional)</span>
             </label>
@@ -236,11 +162,11 @@ export default function ModalAdicionarProfessor({
             </select>
           </div>
 
-          {/* CAMPO MANUAL EXPANDIDO: Caso selecione 'Outra' ou não escolha no select */}
+          {/* Campo manual / detalhes da matéria caso selecione 'Outra' ou não escolha no select */}
           {(materiaSelecionada === 'Outra' || materiaSelecionada === '') && (
             <div>
               <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                Nome da Matéria / Detalhes das Disciplinas
+                Nome da Matéria / Detalhes das Disciplinas <span className="font-normal">(opcional)</span>
               </label>
               <textarea
                 rows={2}
@@ -251,6 +177,83 @@ export default function ModalAdicionarProfessor({
               />
             </div>
           )}
+
+          {/* 3. E-mail e Sala */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                E-mail de Contato <span className="font-normal">(opcional)</span>
+              </label>
+              <input
+                type="email"
+                placeholder="exemplo@cefetmg.br"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                Sala / Prédio <span className="font-normal">(opcional)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Sala 204 - Prédio 2"
+                value={sala}
+                onChange={(e) => setSala(e.target.value)}
+                className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
+              />
+            </div>
+          </div>
+
+          {/* 4. Nível de Exigência (Agora Opcional) */}
+          <div>
+            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+              Nível de Exigência <span className="font-normal">(opcional)</span>
+            </label>
+            <select
+              value={dificuldade}
+              onChange={(e) => setDificuldade(e.target.value)}
+              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
+            >
+              <option value="">Não informado</option>
+              <option value="Tranquilo">Tranquilo</option>
+              <option value="Médio">Médio</option>
+              <option value="Exigente">Exigente</option>
+            </select>
+          </div>
+
+          {/* 5. Cobra Presença (Agora Opcional) */}
+          <div>
+            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+              Cobra Presença <span className="font-normal">(opcional)</span>
+            </label>
+            <select
+              value={passaLista}
+              onChange={(e) => setPassaLista(e.target.value)}
+              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
+            >
+              <option value="">Não informado</option>
+              <option value="Sempre">Sempre</option>
+              <option value="Às vezes">Às vezes</option>
+              <option value="Raramente">Raramente</option>
+              <option value="Não cobra">Não cobra</option>
+            </select>
+          </div>
+
+          {/* 6. Dicas e Visão Geral */}
+          <div>
+            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+              Dicas e Visão Geral <span className="font-normal">(opcional)</span>
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Ex: Cobra muita teoria nas provas, dá ponto por participação, etc."
+              value={dicas}
+              onChange={(e) => setDicas(e.target.value)}
+              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none resize-y"
+            />
+          </div>
 
           {/* Botão de Enviar */}
           <div className="pt-2">
