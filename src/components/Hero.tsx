@@ -44,6 +44,14 @@ export default function Hero() {
           </Link>
         </div>
 
+        <Link
+        href="/professores"
+        className="w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-sm text-center active:scale-95"
+        >
+        Professores 👨‍🏫
+        </Link>
+
+
       </div>
     </section>
   );
