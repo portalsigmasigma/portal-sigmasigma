@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 interface Disciplina {
@@ -12,514 +13,146 @@ interface Disciplina {
   periodo?: string;
 }
 
-interface Professor {
+interface Material {
   id: string;
-  nome: string;
+  titulo: string;
+  tipo: string;
+  professor?: string;
+  link_drive: string;
+  observacoes?: string;
+  created_at?: string;
 }
 
-export default function PaginaDisciplinas() {
-  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
-  const [professores, setProfessores] = useState<Professor[]>([]);
+export default function PaginaDetalheDisciplina() {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const [disciplina, setDisciplina] = useState<Disciplina | null>(null);
+  const [materiais, setMateriais] = useState<Material[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [filtroTipo, setFiltroTipo] = useState<string>('Todas');
-
-  // Modal para Nova Disciplina
-  const [modalDisciplinaAberto, setModalDisciplinaAberto] = useState(false);
-  const [enviandoDisciplina, setEnviandoDisciplina] = useState(false);
-
-  // Campos - Nova Disciplina
-  const [nomeDisciplina, setNomeDisciplina] = useState('');
-  const [codigoDisciplina, setCodigoDisciplina] = useState('');
-  const [tipoDisciplina, setTipoDisciplina] = useState<'Obrigatória' | 'Optativa'>('Obrigatória');
-  const [periodoDisciplina, setPeriodoDisciplina] = useState('1º Período');
-
-  // Modal para Relacionar Material
-  const [modalMaterialAberto, setModalMaterialAberto] = useState(false);
-  const [enviandoMaterial, setEnviandoMaterial] = useState(false);
-  const [disciplinaSelecionada, setDisciplinaSelecionada] = useState<Disciplina | null>(null);
-
-  // Campos - Relacionar Material
-  const [tituloMaterial, setTituloMaterial] = useState('');
-  const [professorMaterial, setProfessorMaterial] = useState('');
-  const [tipoMaterial, setTipoMaterial] = useState('Prova');
-  const [linkDrive, setLinkDrive] = useState('');
-  const [observacoes, setObservacoes] = useState('');
-
-  // Buscar Disciplinas e Professores do Banco de Dados
-  async function carregarDados() {
-    setCarregando(true);
-
-    const [resDisc, resProf] = await Promise.all([
-      supabase.from('disciplinas').select('*').order('codigo', { ascending: true }),
-      supabase.from('professores').select('id, nome').order('nome', { ascending: true }),
-    ]);
-
-    if (!resDisc.error && resDisc.data) {
-      setDisciplinas(resDisc.data);
-    } else {
-      setDisciplinas([]);
-    }
-
-    if (!resProf.error && resProf.data) {
-      setProfessores(resProf.data);
-    }
-
-    setCarregando(false);
-  }
 
   useEffect(() => {
-    carregarDados();
-  }, []);
+    async function carregarDetalhes() {
+      if (!id) return;
+      setCarregando(true);
 
-  // Adicionar Nova Disciplina
-  async function handleSalvarDisciplina(e: React.FormEvent) {
-    e.preventDefault();
-    if (!nomeDisciplina.trim() || !codigoDisciplina.trim()) return;
+      // 1. Buscar a disciplina específica pelo ID
+      const { data: discData, error: discError } = await supabase
+        .from('disciplinas')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    setEnviandoDisciplina(true);
+      if (!discError && discData) {
+        setDisciplina(discData);
 
-    const novaDisciplina = {
-      nome: nomeDisciplina.trim(),
-      codigo: codigoDisciplina.trim().toUpperCase(),
-      tipo: tipoDisciplina,
-      periodo: tipoDisciplina === 'Obrigatória' ? periodoDisciplina : 'Optativa',
-    };
+        // 2. Buscar materiais vinculados ao nome ou código da disciplina
+        const { data: matData } = await supabase
+          .from('materiais')
+          .select('*')
+          .or(`disciplina.eq.${discData.nome},disciplina.eq.${discData.codigo}`)
+          .order('created_at', { ascending: false });
 
-    const { error } = await supabase.from('disciplinas').insert([novaDisciplina]);
+        setMateriais(matData || []);
+      }
 
-    if (!error) {
-      setNomeDisciplina('');
-      setCodigoDisciplina('');
-      setTipoDisciplina('Obrigatória');
-      setPeriodoDisciplina('1º Período');
-      setModalDisciplinaAberto(false);
-      carregarDados();
-    } else {
-      alert('Erro ao cadastrar disciplina: ' + error.message);
+      setCarregando(false);
     }
 
-    setEnviandoDisciplina(false);
+    carregarDetalhes();
+  }, [id]);
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-fundo text-texto-principal p-8 flex items-center justify-center">
+        <p className="text-xs text-texto-secundario animate-pulse">Carregando disciplina... ⚡</p>
+      </div>
+    );
   }
 
-  // Deletar Disciplina
-  async function handleDeletarDisciplina(id: string) {
-    if (!confirm('Deseja realmente remover esta disciplina?')) return;
-
-    const { error } = await supabase.from('disciplinas').delete().eq('id', id);
-
-    if (!error) {
-      carregarDados();
-    } else {
-      alert('Erro ao remover disciplina: ' + error.message);
-    }
+  if (!disciplina) {
+    return (
+      <div className="min-h-screen bg-fundo text-texto-principal p-8 max-w-3xl mx-auto text-center space-y-4">
+        <h1 className="text-xl font-bold text-azul-texto">Disciplina não encontrada</h1>
+        <Link
+          href="/disciplinas"
+          className="inline-block px-4 py-2 bg-card border border-borda rounded-lg text-xs font-semibold hover:border-azul-texto transition-all"
+        >
+          &larr; Voltar para Disciplinas
+        </Link>
+      </div>
+    );
   }
-
-  // Abrir Modal de Relacionar Material
-  function abrirModalMaterial(disc: Disciplina) {
-    setDisciplinaSelecionada(disc);
-    setTituloMaterial('');
-    setProfessorMaterial('');
-    setTipoMaterial('Prova');
-    setLinkDrive('');
-    setObservacoes('');
-    setModalMaterialAberto(true);
-  }
-
-  // Salvar Material Relacionado
-  async function handleSalvarMaterial(e: React.FormEvent) {
-    e.preventDefault();
-    if (!disciplinaSelecionada || !tituloMaterial.trim() || !linkDrive.trim()) return;
-
-    setEnviandoMaterial(true);
-
-    const novoMaterial = {
-      titulo: tituloMaterial.trim(),
-      disciplina: disciplinaSelecionada.nome,
-      professor: professorMaterial || null,
-      tipo: tipoMaterial,
-      link_drive: linkDrive.trim(),
-      observacoes: observacoes.trim() || null,
-      status: 'aprovado',
-    };
-
-    let { error } = await supabase.from('materiais').insert([novoMaterial]);
-
-    if (error) {
-      const fallback = await supabase.from('contribuicoes').insert([novoMaterial]);
-      error = fallback.error;
-    }
-
-    if (!error) {
-      alert('Material vinculado com sucesso!');
-      setModalMaterialAberto(false);
-    } else {
-      alert('Erro ao salvar material: ' + error.message);
-    }
-
-    setEnviandoMaterial(false);
-  }
-
-  // Filtragem
-  const disciplinasFiltradas = disciplinas.filter((d) => {
-    if (filtroTipo === 'Todas') return true;
-    return d.tipo === filtroTipo;
-  });
 
   return (
-    <div className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 w-full max-w-full overflow-x-hidden box-border">
-      <div className="max-w-5xl mx-auto w-full">
-        {/* Topo / Voltar e Ação */}
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-borda text-xs font-semibold text-azul-texto hover:border-azul-texto transition-all active:scale-95"
-          >
-            &larr; Voltar ao Início
-          </Link>
+    <div className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 w-full max-w-full box-border">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Botão Voltar */}
+        <Link
+          href="/disciplinas"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-borda text-xs font-semibold text-azul-texto hover:border-azul-texto transition-all"
+        >
+          &larr; Voltar para Disciplinas
+        </Link>
 
-          <button
-            onClick={() => setModalDisciplinaAberto(true)}
-            className="px-3.5 py-1.5 bg-destaque hover:bg-destaque/90 text-white rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
-          >
-            <span>+</span> Nova Disciplina
-          </button>
-        </div>
+        {/* Informações da Disciplina */}
+        <div className="bg-card border border-borda rounded-2xl p-6 space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs font-bold px-3 py-1 rounded bg-borda/40 text-azul-texto">
+              {disciplina.codigo}
+            </span>
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded border bg-blue-500/10 text-azul-texto border-blue-500/20">
+              {disciplina.tipo}
+            </span>
+          </div>
 
-        {/* Cabeçalho */}
-        <div className="mb-6 space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-azul-texto tracking-tight">
-            Grade de Disciplinas
-          </h1>
-          <p className="text-xs sm:text-sm text-texto-secundario">
-            Cadastre disciplinas e relacione materiais diretamente.
+          <h1 className="text-2xl font-extrabold text-texto-principal">{disciplina.nome}</h1>
+
+          <p className="text-xs text-texto-secundario">
+            {disciplina.tipo === 'Obrigatória'
+              ? `Pertence ao ${disciplina.periodo || 'período não informado'}`
+              : 'Disciplina de caráter optativo'}
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="flex items-center space-x-2 mb-6">
-          {['Todas', 'Obrigatória', 'Optativa'].map((t) => (
-            <button
-              key={t}
-              onClick={() => setFiltroTipo(t)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                filtroTipo === t
-                  ? 'bg-destaque text-white shadow-md'
-                  : 'bg-card border border-borda text-texto-secundario hover:text-texto-principal'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        {/* Lista de Materiais da Disciplina */}
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-azul-texto">
+            Materiais e Provas Associados ({materiais.length})
+          </h2>
 
-        {/* Lista de Disciplinas */}
-        {carregando ? (
-          <div className="text-center py-12 text-xs text-texto-secundario animate-pulse">
-            Carregando disciplinas... ⚡
-          </div>
-        ) : disciplinasFiltradas.length > 0 ? (
-          <div className="bg-card border border-borda rounded-xl overflow-hidden shadow-sm divide-y divide-borda">
-            {disciplinasFiltradas.map((item) => (
-              <div
-                key={item.id}
-                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-borda/20 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-borda/40 text-azul-texto shrink-0">
-                    {item.codigo}
-                  </span>
-
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-texto-principal">
-                      {item.nome}
-                    </h3>
-                    <p className="text-[11px] text-texto-secundario">
-                      {item.tipo === 'Obrigatória'
-                        ? `Obrigatória • ${item.periodo || 'Período não informado'}`
-                        : 'Matéria Optativa'}
-                    </p>
+          {materiais.length > 0 ? (
+            <div className="bg-card border border-borda rounded-xl overflow-hidden divide-y divide-borda">
+              {materiais.map((mat) => (
+                <div key={mat.id} className="p-4 flex items-center justify-between hover:bg-borda/20 transition-all">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-borda/40 text-texto-secundario">
+                      {mat.tipo}
+                    </span>
+                    <h3 className="text-xs font-bold text-texto-principal">{mat.titulo}</h3>
+                    {mat.professor && (
+                      <p className="text-[11px] text-texto-secundario">Prof. {mat.professor}</p>
+                    )}
                   </div>
+
+                  <a
+                    href={mat.link_drive}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-destaque text-white text-xs font-semibold rounded-lg hover:bg-destaque/90 transition-all flex items-center gap-1"
+                  >
+                    Abrir Link ↗
+                  </a>
                 </div>
-
-                <div className="flex items-center gap-2 self-start sm:self-center">
-                  <span
-                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded border ${
-                      item.tipo === 'Obrigatória'
-                        ? 'bg-blue-500/10 text-azul-texto border-blue-500/20'
-                        : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                    }`}
-                  >
-                    {item.tipo}
-                  </span>
-
-                  <button
-                    onClick={() => abrirModalMaterial(item)}
-                    className="px-3 py-1.5 bg-borda/50 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg transition-all text-texto-principal flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <span>📎</span> Relacionar Material
-                  </button>
-
-                  <button
-                    onClick={() => handleDeletarDisciplina(item.id)}
-                    className="p-1.5 hover:bg-red-500/20 text-texto-secundario hover:text-red-400 rounded-lg transition-all text-xs"
-                    title="Excluir Disciplina"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-card border border-borda rounded-xl p-8 text-center text-xs text-texto-secundario">
-            Nenhuma disciplina cadastrada. Clique em "+ Nova Disciplina" para adicionar.
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card border border-borda rounded-xl p-8 text-center text-xs text-texto-secundario">
+              Nenhum material vinculado a esta disciplina até o momento.
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* MODAL: Cadastro de Disciplina */}
-      {modalDisciplinaAberto && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-borda w-full max-w-md rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-sm sm:text-base font-bold text-azul-texto">
-                Cadastrar Nova Disciplina
-              </h2>
-              <button
-                onClick={() => setModalDisciplinaAberto(false)}
-                className="text-texto-secundario hover:text-texto-principal text-xs p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSalvarDisciplina} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Nome da Disciplina
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Sistemas Digitais"
-                  value={nomeDisciplina}
-                  onChange={(e) => setNomeDisciplina(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Código da Disciplina
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: ELC102"
-                  value={codigoDisciplina}
-                  onChange={(e) => setCodigoDisciplina(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto uppercase"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Tipo da Disciplina
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setTipoDisciplina('Obrigatória')}
-                    className={`p-2 rounded-lg text-xs font-semibold border transition-all ${
-                      tipoDisciplina === 'Obrigatória'
-                        ? 'bg-destaque text-white border-destaque'
-                        : 'bg-fundo border-borda text-texto-secundario'
-                    }`}
-                  >
-                    Obrigatória
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTipoDisciplina('Optativa')}
-                    className={`p-2 rounded-lg text-xs font-semibold border transition-all ${
-                      tipoDisciplina === 'Optativa'
-                        ? 'bg-destaque text-white border-destaque'
-                        : 'bg-fundo border-borda text-texto-secundario'
-                    }`}
-                  >
-                    Optativa
-                  </button>
-                </div>
-              </div>
-
-              {tipoDisciplina === 'Obrigatória' && (
-                <div>
-                  <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                    Qual Período?
-                  </label>
-                  <select
-                    value={periodoDisciplina}
-                    onChange={(e) => setPeriodoDisciplina(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((p) => (
-                      <option key={p} value={`${p}º Período`}>
-                        {p}º Período
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalDisciplinaAberto(false)}
-                  className="w-1/2 py-2 bg-fundo border border-borda rounded-lg text-xs font-semibold text-texto-secundario hover:text-texto-principal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={enviandoDisciplina}
-                  className="w-1/2 py-2 bg-destaque hover:bg-destaque/90 text-white rounded-lg text-xs font-semibold transition-all"
-                >
-                  {enviandoDisciplina ? 'Salvando...' : 'Salvar Disciplina'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: Relacionar Material */}
-      {modalMaterialAberto && disciplinaSelecionada && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-borda w-full max-w-md rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-azul-texto">
-                  Adicionar Material
-                </h2>
-                <p className="text-[11px] text-texto-secundario">
-                  Para: <strong className="text-texto-principal">{disciplinaSelecionada.nome}</strong> ({disciplinaSelecionada.codigo})
-                </p>
-              </div>
-              <button
-                onClick={() => setModalMaterialAberto(false)}
-                className="text-texto-secundario hover:text-texto-principal text-xs p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSalvarMaterial} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Título do Arquivo / Prova
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Prova 1 - 2023.2"
-                  value={tituloMaterial}
-                  onChange={(e) => setTituloMaterial(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Professor (Opcional)
-                </label>
-                {professores.length > 0 ? (
-                  <select
-                    value={professorMaterial}
-                    onChange={(e) => setProfessorMaterial(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                  >
-                    <option value="">Selecione o professor (se souber)...</option>
-                    {professores.map((prof) => (
-                      <option key={prof.id} value={prof.nome}>
-                        {prof.nome}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    placeholder="Nome do professor..."
-                    value={professorMaterial}
-                    onChange={(e) => setProfessorMaterial(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                  />
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Tipo de Material
-                </label>
-                <select
-                  value={tipoMaterial}
-                  onChange={(e) => setTipoMaterial(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                >
-                  <option value="Prova">Prova</option>
-                  <option value="Lista de Exercícios">Lista de Exercícios</option>
-                  <option value="Trabalho">Trabalho</option>
-                  <option value="Gabarito">Gabarito</option>
-                  <option value="Material Didático">Material Didático</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Link do Google Drive
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://drive.google.com/file/d/..."
-                  value={linkDrive}
-                  onChange={(e) => setLinkDrive(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                  Observações (Opcional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ex: Contém gabarito no final"
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg bg-fundo border border-borda text-texto-principal focus:outline-none focus:border-azul-texto"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalMaterialAberto(false)}
-                  className="w-1/2 py-2 bg-fundo border border-borda rounded-lg text-xs font-semibold text-texto-secundario hover:text-texto-principal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={enviandoMaterial}
-                  className="w-1/2 py-2 bg-destaque hover:bg-destaque/90 text-white rounded-lg text-xs font-semibold transition-all"
-                >
-                  {enviandoMaterial ? 'Enviando...' : 'Salvar Material'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
