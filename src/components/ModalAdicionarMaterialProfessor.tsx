@@ -41,9 +41,7 @@ export default function ModalAdicionarMaterialProfessor({
     }
   }, [isOpen]);
 
-  const fetchDisciplinas = async () => {
-    const { data } = await supabase.from('materiais').select('disciplina');
-
+const fetchDisciplinas = async () => {
     const padrao = [
       'Cálculo I',
       'Cálculo II',
@@ -53,12 +51,21 @@ export default function ModalAdicionarMaterialProfessor({
       'Geometria Analítica',
     ];
 
-    if (data) {
+    try {
+      const { data, error } = await supabase.from('materiais').select('disciplina');
+
+      if (error || !data) {
+        setDisciplinasCadastradas(padrao);
+        setDisciplinaSelecionada(padrao[0]);
+        return;
+      }
+
       const doBanco = data.map((d) => d.disciplina).filter(Boolean);
       const unicas = Array.from(new Set([...padrao, ...doBanco])).sort();
+      
       setDisciplinasCadastradas(unicas);
       if (unicas.length > 0) setDisciplinaSelecionada(unicas[0]);
-    } else {
+    } catch {
       setDisciplinasCadastradas(padrao);
       setDisciplinaSelecionada(padrao[0]);
     }
