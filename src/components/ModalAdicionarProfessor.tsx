@@ -138,7 +138,11 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
                   >
                     {opcoesDificuldade.map((opcao) => (
-                      <option key={opcao} value={opcao} className="bg-card text-texto-principal">
+                      <option 
+                        key={opcao} 
+                        value={opcao} 
+                        className="bg-[#18181b] text-white py-2"
+                      >
                         {opcao}
                       </option>
                     ))}
@@ -161,7 +165,11 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
                   >
                     {opcoesPresenca.map((opcao) => (
-                      <option key={opcao} value={opcao} className="bg-card text-texto-principal">
+                      <option 
+                        key={opcao} 
+                        value={opcao} 
+                        className="bg-[#18181b] text-white py-2"
+                      >
                         {opcao}
                       </option>
                     ))}
