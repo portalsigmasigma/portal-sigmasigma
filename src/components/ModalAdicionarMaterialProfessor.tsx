@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface ModalProps {
@@ -18,20 +18,69 @@ export default function ModalAdicionarMaterialProfessor({
 }: ModalProps) {
   const [enviado, setEnviado] = useState(false);
   const [titulo, setTitulo] = useState('');
-  const [disciplina, setDisciplina] = useState('');
-  const [tipo, setTipo] = useState('Prova');
+  const [disciplinasCadastradas, setDisciplinasCadastradas] = useState<string[]>([]);
+  const [disciplinaSelecionada, setDisciplinaSelecionada] = useState('');
+  const [outraDisciplina, setOutraDisciplina] = useState('');
+  const [tipo, setTipo] = useState('Material Didático');
   const [linkDrive, setLinkDrive] = useState('');
   const [descricao, setDescricao] = useState('');
+
+  // Lista atualizada de tipos de material
+  const tiposMaterial = [
+    'Material Didático',
+    'Prova',
+    'Trabalho',
+    'Lista de Exercícios',
+    'Resumo',
+    'Outros',
+  ];
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchDisciplinas();
+    }
+  }, [isOpen]);
+
+  const fetchDisciplinas = async () => {
+    const { data } = await supabase.from('materiais').select('disciplina');
+
+    const padrao = [
+      'Cálculo I',
+      'Cálculo II',
+      'Sistemas Digitais',
+      'Circuitos Elétricos',
+      'Física Teórica',
+      'Geometria Analítica',
+    ];
+
+    if (data) {
+      const doBanco = data.map((d) => d.disciplina).filter(Boolean);
+      const unicas = Array.from(new Set([...padrao, ...doBanco])).sort();
+      setDisciplinasCadastradas(unicas);
+      if (unicas.length > 0) setDisciplinaSelecionada(unicas[0]);
+    } else {
+      setDisciplinasCadastradas(padrao);
+      setDisciplinaSelecionada(padrao[0]);
+    }
+  };
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const disciplinaFinal =
+      disciplinaSelecionada === 'Outra' ? outraDisciplina : disciplinaSelecionada;
+
+    if (!disciplinaFinal) {
+      alert('Por favor, selecione ou informe a disciplina.');
+      return;
+    }
+
     const { error } = await supabase.from('materiais').insert([
       {
         titulo,
-        disciplina,
+        disciplina: disciplinaFinal,
         tipo,
         link_drive: linkDrive,
         descricao,
@@ -54,11 +103,9 @@ export default function ModalAdicionarMaterialProfessor({
     }, 2500);
   };
 
-  const tiposMaterial = ['Prova', 'Trabalho', 'Lista de Exercícios', 'Resumo', 'Outros'];
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div 
+      <div
         className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -90,6 +137,7 @@ export default function ModalAdicionarMaterialProfessor({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Título do Material */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Título do Material *
@@ -97,51 +145,80 @@ export default function ModalAdicionarMaterialProfessor({
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Prova 1 - P1 de Cálculo II (2025/1)"
+                  placeholder="Ex: George B Thomas V2 11ed"
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Disciplina *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ex: Cálculo I"
-                    value={disciplina}
-                    onChange={(e) => setDisciplina(e.target.value)}
-                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Tipo de Material *
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={tipo}
-                      onChange={(e) => setTipo(e.target.value)}
-                      className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
-                    >
-                      {tiposMaterial.map((t) => (
-                        <option key={t} value={t} className="bg-[#18181b] text-white py-2">
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-texto-secundario text-xs">
-                      ▼
-                    </div>
+              {/* Disciplina (Largura Total) */}
+              <div>
+                <label className="block text-xs font-semibold text-texto-secundario mb-1">
+                  Disciplina *
+                </label>
+                <div className="relative">
+                  <select
+                    value={disciplinaSelecionada}
+                    onChange={(e) => setDisciplinaSelecionada(e.target.value)}
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
+                  >
+                    {disciplinasCadastradas.map((d) => (
+                      <option key={d} value={d} className="bg-[#18181b] text-white py-2">
+                        {d}
+                      </option>
+                    ))}
+                    <option value="Outra" className="bg-[#18181b] text-white py-2">
+                      + Digitar outra disciplina...
+                    </option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-texto-secundario text-xs">
+                    ▼
                   </div>
                 </div>
               </div>
 
+              {/* Campo de Texto para Nova Disciplina (Largura Total) */}
+              {disciplinaSelecionada === 'Outra' && (
+                <div>
+                  <label className="block text-xs font-semibold text-texto-secundario mb-1">
+                    Nome da Nova Disciplina *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Digite o nome completo da disciplina..."
+                    value={outraDisciplina}
+                    onChange={(e) => setOutraDisciplina(e.target.value)}
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Tipo de Material (Largura Total) */}
+              <div>
+                <label className="block text-xs font-semibold text-texto-secundario mb-1">
+                  Tipo de Material *
+                </label>
+                <div className="relative">
+                  <select
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
+                  >
+                    {tiposMaterial.map((t) => (
+                      <option key={t} value={t} className="bg-[#18181b] text-white py-2">
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-texto-secundario text-xs">
+                    ▼
+                  </div>
+                </div>
+              </div>
+
+              {/* Link do Arquivo */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Link do Arquivo (Google Drive, PDF, etc.) *
@@ -156,6 +233,7 @@ export default function ModalAdicionarMaterialProfessor({
                 />
               </div>
 
+              {/* Observações */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Observações / Dicas adicionais <span className="text-[10px] text-texto-secundario/70">(opcional)</span>
