@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase'; 
+
 
 interface ModalContribuirProps {
   isOpen: boolean;
@@ -43,18 +45,34 @@ export default function ModalContribuir({ isOpen, onClose }: ModalContribuirProp
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    console.log('Dados prontos para envio:', formData);
+  // Envia diretamente para a tabela no Supabase
+  const { error } = await supabase.from('contribuicoes').insert([
+    {
+      titulo: formData.titulo,
+      disciplina: formData.disciplina,
+      professor: formData.professor,
+      tipo: formData.tipo,
+      link_drive: formData.linkDrive,
+      observacoes: formData.observacoes,
+      status: 'pendente',
+    },
+  ]);
 
-    setEnviado(true);
-    setTimeout(() => {
-      setEnviado(false);
-      onClose();
-    }, 2500);
-  };
+  if (error) {
+    console.error('Erro ao enviar para o Supabase:', error);
+    alert('Erro ao enviar material. Verifique a tabela no Supabase e tente novamente.');
+    return;
+  }
 
+  setEnviado(true);
+  setTimeout(() => {
+    setEnviado(false);
+    onClose();
+  }, 2500);
+};
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
