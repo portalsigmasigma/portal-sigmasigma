@@ -10,7 +10,10 @@ interface Professor {
   nome: string;
   email?: string;
   sala?: string;
-  passa_lista?: string;
+  // Mapeamento compatível com ambas as versões do banco
+  presenca?: string | boolean;
+  passa_lista?: string | boolean;
+  exigencia?: string;
   dificuldade?: string;
 }
 
@@ -27,10 +30,10 @@ export default function ProfessoresPage() {
   const fetchProfessores = async () => {
     setLoading(true);
     const { data, error } = await supabase
-    .from('professores')
-    .select('*')
-    .eq('status', 'aprovado') // traz apenas os aprovados
-    .order('nome', { ascending: true });
+      .from('professores')
+      .select('*')
+      .eq('status', 'aprovado') // traz apenas os aprovados
+      .order('nome', { ascending: true });
 
     if (error) {
       console.error('Erro ao buscar professores:', error);
@@ -49,12 +52,21 @@ export default function ProfessoresPage() {
       case 'tranquilo':
         return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
       case 'médio':
+      case 'medio':
         return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
       case 'exigente':
         return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
       default:
         return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
     }
+  };
+
+  // Função auxiliar para tratar e formatar o campo de presença
+  const formatarPresenca = (val?: string | boolean) => {
+    if (typeof val === 'boolean') {
+      return val ? 'Passa Lista' : 'Não cobra';
+    }
+    return val || 'Não informado';
   };
 
   return (
@@ -111,35 +123,41 @@ export default function ProfessoresPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {professoresFiltrados.map((prof) => (
-            <Link key={prof.id} href={`/professores/${prof.id}`}>
-              <div className="bg-card border border-borda hover:border-azul-texto/50 rounded-2xl p-5 transition-all shadow-sm hover:shadow-md space-y-3 cursor-pointer group">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-base font-bold text-texto-principal group-hover:text-azul-texto transition-colors">
-                    {prof.nome}
-                  </h2>
-                  {prof.dificuldade && (
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getDificuldadeColor(
-                        prof.dificuldade
-                      )}`}
-                    >
-                      {prof.dificuldade}
-                    </span>
-                  )}
-                </div>
+          {professoresFiltrados.map((prof) => {
+            // Unificação dos dados (prioriza coluna nova, recua para antiga)
+            const nivelExigencia = prof.exigencia || prof.dificuldade;
+            const valorPresenca = formatarPresenca(prof.presenca ?? prof.passa_lista);
 
-                <div className="space-y-1.5 text-xs text-texto-secundario">
-                  <p className="truncate">
-                    📧 <strong>E-mail:</strong> {prof.email || 'Não informado'}
-                  </p>
-                  <p>
-                    📝 <strong>Cobra presença:</strong> {prof.passa_lista || 'Não informado'}
-                  </p>
+            return (
+              <Link key={prof.id} href={`/professores/${prof.id}`}>
+                <div className="bg-card border border-borda hover:border-azul-texto/50 rounded-2xl p-5 transition-all shadow-sm hover:shadow-md space-y-3 cursor-pointer group">
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-base font-bold text-texto-principal group-hover:text-azul-texto transition-colors">
+                      {prof.nome}
+                    </h2>
+                    {nivelExigencia && (
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getDificuldadeColor(
+                          nivelExigencia
+                        )}`}
+                      >
+                        {nivelExigencia}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 text-xs text-texto-secundario">
+                    <p className="truncate">
+                      📧 <strong>E-mail:</strong> {prof.email || 'Não informado'}
+                    </p>
+                    <p>
+                      📝 <strong>Cobra presença:</strong> {valorPresenca}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
 
