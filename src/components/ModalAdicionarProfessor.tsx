@@ -78,7 +78,7 @@ export default function ModalAdicionarProfessor({
       passa_lista: passaLista || null,
       dicas: dicas.trim() || null,
       materia: materiaFinal || null,
-      status: 'aprovado',
+      status: 'pendente' // Define como pendente para aprovação do admin
     };
 
     const { error } = await supabase.from('professores').insert([novoProfessor]);

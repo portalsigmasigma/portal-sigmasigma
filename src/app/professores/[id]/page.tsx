@@ -13,6 +13,7 @@ interface Professor {
   presenca?: string;
   exigencia?: string;
   dicas?: string;
+  status?: string;
 }
 
 interface Material {
@@ -55,15 +56,17 @@ export default function DetalhesProfessorPage({
     } else {
       setProfessor(profData);
 
-      // Buscar materiais associados
-      const { data: matData, error: matError } = await supabase
-        .from('materiais')
-        .select('*')
-        .eq('status', 'aprovado')
-        .or(`professor_id.eq.${id},professor.ilike.%${profData.nome}%`);
+      // Buscar materiais associados apenas se o professor estiver aprovado
+      if (profData.status === 'aprovado') {
+        const { data: matData, error: matError } = await supabase
+          .from('materiais')
+          .select('*')
+          .eq('status', 'aprovado')
+          .or(`professor_id.eq.${id},professor.ilike.%${profData.nome}%`);
 
-      if (!matError) {
-        setMateriais(matData || []);
+        if (!matError) {
+          setMateriais(matData || []);
+        }
       }
     }
 
@@ -101,11 +104,18 @@ export default function DetalhesProfessorPage({
         </Link>
       </div>
 
+      {/* Alerta caso esteja pendente */}
+      {professor.status === 'pendente' && (
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 p-4 rounded-xl text-xs font-medium">
+          ⚠️ Este professor foi cadastrado recentemente e está <strong>aguardando aprovação da moderação</strong> antes de ficar visível na lista pública.
+        </div>
+      )}
+
       {/* Header do Perfil */}
       <div className="bg-card border border-borda rounded-2xl p-6 sm:p-8 shadow-lg space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-texto-principal">
+            <h1 className="text-2xl sm:text-3xl font-black text-texto-principal flex items-center gap-2">
               {professor.nome}
             </h1>
             <p className="text-xs text-texto-secundario mt-1 flex items-center gap-1.5">
