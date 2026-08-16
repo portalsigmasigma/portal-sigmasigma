@@ -10,11 +10,11 @@ interface ModalProps {
 
 export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps) {
   const [enviado, setEnviado] = useState(false);
-  const [dificuldade, setDificuldade] = useState('Médio');
-  const [passaLista, setPassaLista] = useState('Sempre');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [sala, setSala] = useState('');
+  const [dificuldade, setDificuldade] = useState('Médio');
+  const [passaLista, setPassaLista] = useState('Sempre');
   const [resumo, setResumo] = useState('');
 
   if (!isOpen) return null;
@@ -51,15 +51,15 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
   const opcoesPresenca = ['Nunca', 'Às vezes', 'Sempre', 'Passa lista'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm pointer-events-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div 
-        className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto z-50"
+        className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold cursor-pointer z-50 p-2"
+          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold cursor-pointer p-2"
         >
           ✕
         </button>
@@ -126,55 +126,49 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 </div>
               </div>
 
-              {/* Nível de Exigência */}
+              {/* Select para Nível de Exigência */}
               <div>
-                <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
+                <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Nível de Exigência *
                 </label>
-                <div className="flex flex-wrap gap-2 relative z-10">
-                  {opcoesDificuldade.map((opcao) => {
-                    const ativo = dificuldade === opcao;
-                    return (
-                      <button
-                        key={opcao}
-                        type="button"
-                        onClick={() => setDificuldade(opcao)}
-                        className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none relative z-20 ${
-                          ativo
-                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.2)]'
-                            : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
-                        }`}
-                      >
+                <div className="relative">
+                  <select
+                    value={dificuldade}
+                    onChange={(e) => setDificuldade(e.target.value)}
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
+                  >
+                    {opcoesDificuldade.map((opcao) => (
+                      <option key={opcao} value={opcao} className="bg-card text-texto-principal">
                         {opcao}
-                      </button>
-                    );
-                  })}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-texto-secundario text-xs">
+                    ▼
+                  </div>
                 </div>
               </div>
 
-              {/* Cobra Presença */}
+              {/* Select para Cobra Presença */}
               <div>
-                <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
+                <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Cobra Presença *
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 relative z-10">
-                  {opcoesPresenca.map((opcao) => {
-                    const ativo = passaLista === opcao;
-                    return (
-                      <button
-                        key={opcao}
-                        type="button"
-                        onClick={() => setPassaLista(opcao)}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer select-none relative z-20 ${
-                          ativo
-                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.2)]'
-                            : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
-                        }`}
-                      >
+                <div className="relative">
+                  <select
+                    value={passaLista}
+                    onChange={(e) => setPassaLista(e.target.value)}
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none appearance-none cursor-pointer pr-8"
+                  >
+                    {opcoesPresenca.map((opcao) => (
+                      <option key={opcao} value={opcao} className="bg-card text-texto-principal">
                         {opcao}
-                      </button>
-                    );
-                  })}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-texto-secundario text-xs">
+                    ▼
+                  </div>
                 </div>
               </div>
 
@@ -194,7 +188,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer relative z-20"
+                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Enviar para Moderação
                 </button>
