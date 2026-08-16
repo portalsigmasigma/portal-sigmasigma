@@ -34,6 +34,12 @@ export default function ModalAdicionarProfessor({
   const [materiaSelecionada, setMateriaSelecionada] = useState('');
   const [materiaManual, setMateriaManual] = useState('');
 
+  // Estilo inline forçado para os <option> para evitar o bug de fundo branco do Windows/Chrome
+  const optionStyle = {
+    backgroundColor: '#121212',
+    color: '#ffffff',
+  };
+
   useEffect(() => {
     if (isOpen) {
       carregarDisciplinas();
@@ -121,7 +127,7 @@ export default function ModalAdicionarProfessor({
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Nome do Docente */}
+          {/* 1. Nome do Docente */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Nome do Docente *
@@ -136,7 +142,7 @@ export default function ModalAdicionarProfessor({
             />
           </div>
 
-          {/* Relacionar a uma Matéria Cadastrada */}
+          {/* 2. Relacionar a uma Matéria Cadastrada */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Relacionar a uma Matéria Cadastrada <span className="font-normal">(opcional)</span>
@@ -146,27 +152,27 @@ export default function ModalAdicionarProfessor({
               onChange={(e) => setMateriaSelecionada(e.target.value)}
               className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
             >
-              <option value="" className="bg-card text-texto-principal">
+              <option value="" style={optionStyle}>
                 Selecione uma matéria existente...
               </option>
               {loadingDisciplinas ? (
-                <option disabled className="bg-card text-texto-secundario">
+                <option disabled style={optionStyle}>
                   Carregando matérias...
                 </option>
               ) : (
                 disciplinas.map((d) => (
-                  <option key={d.id} value={d.nome} className="bg-card text-texto-principal">
+                  <option key={d.id} value={d.nome} style={optionStyle}>
                     {d.codigo} - {d.nome}
                   </option>
                 ))
               )}
-              <option value="Outra" className="bg-card text-texto-principal">
+              <option value="Outra" style={optionStyle}>
                 + Digitar matéria manualmente / Observação...
               </option>
             </select>
           </div>
 
-          {/* Nome da Matéria Manual */}
+          {/* Campo manual / detalhes da matéria */}
           {(materiaSelecionada === 'Outra' || materiaSelecionada === '') && (
             <div>
               <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
@@ -182,7 +188,7 @@ export default function ModalAdicionarProfessor({
             </div>
           )}
 
-          {/* E-mail e Sala */}
+          {/* 3. E-mail e Sala */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
@@ -210,7 +216,7 @@ export default function ModalAdicionarProfessor({
             </div>
           </div>
 
-          {/* Nível de Exigência */}
+          {/* 4. Nível de Exigência */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Nível de Exigência <span className="font-normal">(opcional)</span>
@@ -220,22 +226,22 @@ export default function ModalAdicionarProfessor({
               onChange={(e) => setDificuldade(e.target.value)}
               className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
             >
-              <option value="" className="bg-card text-texto-principal">
+              <option value="" style={optionStyle}>
                 Não informado
               </option>
-              <option value="Tranquilo" className="bg-card text-texto-principal">
+              <option value="Tranquilo" style={optionStyle}>
                 Tranquilo
               </option>
-              <option value="Médio" className="bg-card text-texto-principal">
+              <option value="Médio" style={optionStyle}>
                 Médio
               </option>
-              <option value="Exigente" className="bg-card text-texto-principal">
+              <option value="Exigente" style={optionStyle}>
                 Exigente
               </option>
             </select>
           </div>
 
-          {/* Cobra Presença */}
+          {/* 5. Cobra Presença */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Cobra Presença <span className="font-normal">(opcional)</span>
@@ -245,25 +251,25 @@ export default function ModalAdicionarProfessor({
               onChange={(e) => setPassaLista(e.target.value)}
               className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
             >
-              <option value="" className="bg-card text-texto-principal">
+              <option value="" style={optionStyle}>
                 Não informado
               </option>
-              <option value="Sempre" className="bg-card text-texto-principal">
+              <option value="Sempre" style={optionStyle}>
                 Sempre
               </option>
-              <option value="Às vezes" className="bg-card text-texto-principal">
+              <option value="Às vezes" style={optionStyle}>
                 Às vezes
               </option>
-              <option value="Raramente" className="bg-card text-texto-principal">
+              <option value="Raramente" style={optionStyle}>
                 Raramente
               </option>
-              <option value="Não cobra" className="bg-card text-texto-principal">
+              <option value="Não cobra" style={optionStyle}>
                 Não cobra
               </option>
             </select>
           </div>
 
-          {/* Dicas e Visão Geral */}
+          {/* 6. Dicas e Visão Geral */}
           <div>
             <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
               Dicas e Visão Geral <span className="font-normal">(opcional)</span>
