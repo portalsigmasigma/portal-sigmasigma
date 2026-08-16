@@ -102,12 +102,12 @@ export default function DetalheProfessor({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="bg-fundo border border-borda rounded-xl p-4 space-y-1">
-              <span className="text-[10px] uppercase font-bold text-texto-secundario tracking-wider">
-                📝 Lista de Presença / Chamada
-              </span>
-              <p className="text-sm font-semibold text-texto-principal">
-                {professor.passa_lista ? 'Sim, cobra presença regularmente' : 'Não / Flexível com falta'}
-              </p>
+            <span className="text-[10px] uppercase font-bold text-texto-secundario tracking-wider">
+                📝 Cobra Presença
+            </span>
+            <p className="text-sm font-semibold text-texto-principal">
+                {professor.passa_lista || 'Não informado'}
+            </p>
             </div>
           </div>
 

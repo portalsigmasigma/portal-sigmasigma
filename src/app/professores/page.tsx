@@ -92,8 +92,8 @@ export default function PaginaProfessores() {
                 </div>
 
                 <div className="space-y-1.5 text-xs text-texto-secundario">
-                  <p>📍 <strong>Sala:</strong> {prof.sala || 'Não informada'}</p>
-                  <p>📝 <strong>Presença:</strong> {prof.passa_lista ? 'Passa lista' : 'Raramente cobra'}</p>
+                <p>📍 <strong>Sala:</strong> {prof.sala || 'Não informada'}</p>
+                <p>📝 <strong>Cobra presença:</strong> {prof.passa_lista || 'Não informado'}</p>
                 </div>
               </Link>
             ))}

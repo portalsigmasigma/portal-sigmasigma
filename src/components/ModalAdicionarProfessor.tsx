@@ -14,7 +14,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
     nome: '',
     email: '',
     sala: '',
-    passaLista: true,
+    passaLista: 'Sempre',
     dificuldade: 'Médio',
     resumo: '',
   });
@@ -49,6 +49,9 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
     }, 2500);
   };
 
+  const opcoesDificuldade = ['Tranquilo', 'Médio', 'Exigente'];
+  const opcoesPresenca = ['Nunca', 'Às vezes', 'Sempre', 'Passa lista'];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
@@ -79,7 +82,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Nome do Docente *
@@ -122,34 +125,49 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Nível de Exigência *
-                  </label>
-                  <select
-                    value={formData.dificuldade}
-                    onChange={(e) => setFormData({ ...formData, dificuldade: e.target.value })}
-                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
-                  >
-                    <option value="Tranquilo">Tranquilo</option>
-                    <option value="Médio">Médio</option>
-                    <option value="Exigente">Exigente</option>
-                  </select>
+              {/* Seletor de Nível de Exigência */}
+              <div>
+                <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
+                  Nível de Exigência *
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {opcoesDificuldade.map((opcao) => (
+                    <button
+                      key={opcao}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, dificuldade: opcao })}
+                      className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                        formData.dificuldade === opcao
+                          ? 'bg-card border-azul-texto text-azul-texto shadow-sm'
+                          : 'bg-card border-borda text-texto-secundario hover:border-azul-texto/50'
+                      }`}
+                    >
+                      {opcao}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Lista de Presença *
-                  </label>
-                  <select
-                    value={formData.passaLista ? 'true' : 'false'}
-                    onChange={(e) => setFormData({ ...formData, passaLista: e.target.value === 'true' })}
-                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
-                  >
-                    <option value="true">Passa lista / Cobra presença</option>
-                    <option value="false">Não cobra / Flexível</option>
-                  </select>
+              {/* Seletor de Cobra Presença */}
+              <div>
+                <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
+                  Cobra Presença *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {opcoesPresenca.map((opcao) => (
+                    <button
+                      key={opcao}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, passaLista: opcao })}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border text-center ${
+                        formData.passaLista === opcao
+                          ? 'bg-card border-azul-texto text-azul-texto shadow-sm'
+                          : 'bg-card border-borda text-texto-secundario hover:border-azul-texto/50'
+                      }`}
+                    >
+                      {opcao}
+                    </button>
+                  ))}
                 </div>
               </div>
 
