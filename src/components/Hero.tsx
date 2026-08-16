@@ -43,10 +43,10 @@ export default function Hero() {
         </Link>
 
         <Link
-            href="/professores"
-            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+        href="/professores"
+        className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
         >
-            Professores 👨‍🏫
+        Professores e Docentes 👨‍🏫
         </Link>
 
         <Link

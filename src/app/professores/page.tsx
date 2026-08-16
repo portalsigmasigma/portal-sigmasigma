@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import ModalAdicionarProfessor from '@/components/ModalAdicionarProfessor';
 
 interface Professor {
   id: string;
@@ -16,12 +17,14 @@ interface Professor {
 export default function PaginaProfessores() {
   const [professores, setProfessores] = useState<Professor[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [modalAberto, setModalAberto] = useState(false);
 
   useEffect(() => {
     async function carregarProfessores() {
       const { data, error } = await supabase
         .from('professores')
         .select('*')
+        .eq('status', 'aprovado') // Filtra apenas aprovados
         .order('nome', { ascending: true });
 
       if (!error && data) {
@@ -36,16 +39,25 @@ export default function PaginaProfessores() {
     <div className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-borda text-xs font-semibold text-azul-texto hover:border-azul-texto transition-all active:scale-95"
-        >
-          &larr; Voltar ao Início
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-borda text-xs font-semibold text-azul-texto hover:border-azul-texto transition-all active:scale-95"
+          >
+            &larr; Voltar ao Início
+          </Link>
+
+          <button
+            onClick={() => setModalAberto(true)}
+            className="px-3.5 py-1.5 rounded-lg bg-destaque hover:bg-blue-600 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+          >
+            Adicionar Docente ➕
+          </button>
+        </div>
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-azul-texto">
-            Corpo Docente 👨‍🏫
+            Professores e Docentes 👨‍🏫
           </h1>
           <p className="text-xs sm:text-sm text-texto-secundario mt-1">
             Clique em um professor para ver localização de sala, presença e dicas de aprovação.
@@ -54,9 +66,9 @@ export default function PaginaProfessores() {
 
         {carregando ? (
           <div className="text-center py-12 text-xs text-texto-secundario animate-pulse">
-            Carregando professores... ⚡
+            Carregando docentes... ⚡
           </div>
-        ) : (
+        ) : professores.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {professores.map((prof) => (
               <Link
@@ -86,8 +98,15 @@ export default function PaginaProfessores() {
               </Link>
             ))}
           </div>
+        ) : (
+          <div className="bg-card border border-borda rounded-xl p-8 text-center text-xs text-texto-secundario">
+            Nenhum docente aprovado cadastrado até o momento.
+          </div>
         )}
+
       </div>
+
+      <ModalAdicionarProfessor isOpen={modalAberto} onClose={() => setModalAberto(false)} />
     </div>
   );
 }
