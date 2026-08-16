@@ -1,37 +1,84 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
 
 interface ModalContribuirProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Sugestões de disciplinas pré-cadastradas
+const sugestoesDisciplinas = [
+  'Cálculo',
+  'Sistemas Digitais',
+  'Circuitos Elétricos',
+  'Física Teórica',
+  'Geometria Analítica',
+];
+
+// Sugestões de professores pré-cadastrados
+const sugestoesProfessores = [
+  'Dr. Roberto',
+  'Dra. Ana Maria',
+  'Prof. Carlos',
+];
+
+// Tipos de materiais disponíveis
+const tiposMaterial = [
+  'Prova',
+  'Lista de Exercícios',
+  'Trabalho',
+  'Gabarito',
+  'Material Didático',
+];
+
 export default function ModalContribuir({ isOpen, onClose }: ModalContribuirProps) {
   const [enviado, setEnviado] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
-    disciplina: 'Cálculo',
+    disciplina: '',
     professor: '',
-    tipo: 'Prova',
+    tipo: tiposMaterial[0],
     linkDrive: '',
+    observacoes: '',
   });
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui pode integrar com uma API, Webhook do Discord/Formspree ou simplesmente simular o envio
-    setEnviado(true);
-    setTimeout(() => {
-      setEnviado(false);
-      onClose();
-    }, 2500);
-  };
+// Dentro do componente ModalContribuir:
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const { error } = await supabase.from('contribuicoes').insert([
+    {
+      titulo: formData.titulo,
+      disciplina: formData.disciplina,
+      professor: formData.professor,
+      tipo: formData.tipo,
+      link_drive: formData.linkDrive,
+      observacoes: formData.observacoes,
+      status: 'pendente',
+    },
+  ]);
+
+  if (error) {
+    console.error('Erro ao enviar:', error);
+    alert('Erro ao enviar o material. Tente novamente!');
+    return;
+  }
+
+  setEnviado(true);
+  setTimeout(() => {
+    setEnviado(false);
+    onClose();
+  }, 2500);
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-card border border-borda rounded-2xl w-full max-w-md p-6 shadow-2xl relative space-y-4">
+      <div className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
         
         {/* Botão Fechar */}
         <button
@@ -61,70 +108,86 @@ export default function ModalContribuir({ isOpen, onClose }: ModalContribuirProp
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Título */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                  Título do Material
+                  Título do Material *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Prova 1 com Gabarito"
+                  placeholder="Ex: Prova 1 - Turma A"
                   value={formData.titulo}
                   onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Disciplina (Com autocompletar e digitação livre) e Tipo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Disciplina
+                    Disciplina *
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    list="disciplinas-sugestoes"
+                    placeholder="Selecione ou digite nova..."
                     value={formData.disciplina}
                     onChange={(e) => setFormData({ ...formData, disciplina: e.target.value })}
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
-                  >
-                    <option value="Cálculo">Cálculo</option>
-                    <option value="Sistemas Digitais">Sistemas Digitais</option>
-                    <option value="Circuitos Elétricos">Circuitos Elétricos</option>
-                    <option value="Outra">Outra</option>
-                  </select>
+                  />
+                  <datalist id="disciplinas-sugestoes">
+                    {sugestoesDisciplinas.map((disc) => (
+                      <option key={disc} value={disc} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                    Tipo
+                    Tipo de Material *
                   </label>
                   <select
                     value={formData.tipo}
                     onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
                     className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                   >
-                    <option value="Prova">Prova</option>
-                    <option value="Gabarito">Gabarito</option>
-                    <option value="Lista">Lista</option>
-                    <option value="Livro">Livro</option>
+                    {tiposMaterial.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
+              {/* Professor (Com autocompletar e digitação livre) */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                  Professor(a)
+                  Professor(a) *
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: Dr. Roberto"
+                  required
+                  list="professores-sugestoes"
+                  placeholder="Selecione ou digite novo professor..."
                   value={formData.professor}
                   onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
                 />
+                <datalist id="professores-sugestoes">
+                  {sugestoesProfessores.map((prof) => (
+                    <option key={prof} value={prof} />
+                  ))}
+                </datalist>
               </div>
 
+              {/* Link do Arquivo */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
-                  Link do Arquivo (Drive / Dropbox)
+                  Link do Arquivo (Google Drive / Dropbox) *
                 </label>
                 <input
                   type="url"
@@ -133,6 +196,20 @@ export default function ModalContribuir({ isOpen, onClose }: ModalContribuirProp
                   value={formData.linkDrive}
                   onChange={(e) => setFormData({ ...formData, linkDrive: e.target.value })}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
+                />
+              </div>
+
+              {/* Informações Adicionais (Opcional) */}
+              <div>
+                <label className="block text-xs font-semibold text-texto-secundario mb-1">
+                  Informações Adicionais / Observações <span className="text-[10px] text-texto-secundario/70">(opcional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Ex: Trabalho valendo 15 pontos, Prova versão B, questões 3 e 4 foram anuladas, etc."
+                  value={formData.observacoes}
+                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none resize-none"
                 />
               </div>
 
