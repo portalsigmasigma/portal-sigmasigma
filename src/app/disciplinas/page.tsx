@@ -9,7 +9,7 @@ interface Disciplina {
   nome: string;
   codigo: string;
   periodo?: string;
-  tipo?: string; // 'obrigatoria' ou 'optativa'
+  tipo?: string;
   ementa?: string;
   status?: string;
 }
@@ -20,7 +20,7 @@ export default function DisciplinasPage() {
   const [busca, setBusca] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState('todos');
 
-  // Modal de Adicionar Disciplina
+  // Modal de Criar Disciplina
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [novoNome, setNovoNome] = useState('');
   const [novoCodigo, setNovoCodigo] = useState('');
@@ -37,8 +37,6 @@ export default function DisciplinasPage() {
 
   async function fetchDisciplinas() {
     setLoading(true);
-    
-    // Busca apenas disciplinas aprovadas (ou sem o status restritivo 'pendente')
     const { data, error } = await supabase
       .from('disciplinas')
       .select('*')
@@ -64,7 +62,7 @@ export default function DisciplinasPage() {
       nome: novoNome.trim(),
       codigo: novoCodigo.trim().toUpperCase(),
       tipo: novoTipo,
-      status: 'pendente', // Enviado como pendente para moderação
+      status: 'pendente',
     };
 
     if (novoPeriodo) novaDisciplina.periodo = novoPeriodo;
@@ -85,7 +83,6 @@ export default function DisciplinasPage() {
       setNovoTipo('obrigatoria');
       setNovaEmenta('');
 
-      // Fecha a mensagem e o modal após 2.5 segundos
       setTimeout(() => {
         setMensagemSucesso(false);
         setIsModalOpen(false);
@@ -95,7 +92,6 @@ export default function DisciplinasPage() {
     setEnviando(false);
   };
 
-  // Filtragem local por texto e período
   const disciplinasFiltradas = disciplinas.filter((d) => {
     const atendeBusca =
       d.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -114,7 +110,6 @@ export default function DisciplinasPage() {
 
   return (
     <main className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 space-y-6 max-w-6xl mx-auto">
-      {/* Botão Voltar para o Início */}
       <div>
         <Link
           href="/"
@@ -125,7 +120,6 @@ export default function DisciplinasPage() {
         </Link>
       </div>
 
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-borda pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-texto-principal flex items-center gap-2">
@@ -148,9 +142,7 @@ export default function DisciplinasPage() {
         </button>
       </div>
 
-      {/* Barra de Filtros */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Campo de Pesquisa */}
         <div className="sm:col-span-2">
           <input
             type="text"
@@ -161,16 +153,13 @@ export default function DisciplinasPage() {
           />
         </div>
 
-        {/* Filtro por Período */}
         <div>
           <select
             value={periodoFiltro}
             onChange={(e) => setPeriodoFiltro(e.target.value)}
             className="w-full text-xs p-3 rounded-xl bg-card border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
           >
-            <option value="todos" style={optionStyle}>
-              Todos os Períodos
-            </option>
+            <option value="todos" style={optionStyle}>Todos os Períodos</option>
             <option value="1º Período" style={optionStyle}>1º Período</option>
             <option value="2º Período" style={optionStyle}>2º Período</option>
             <option value="3º Período" style={optionStyle}>3º Período</option>
@@ -186,7 +175,6 @@ export default function DisciplinasPage() {
         </div>
       </div>
 
-      {/* Grid de Disciplinas */}
       {loading ? (
         <div className="p-12 text-center text-xs text-texto-secundario">
           Carregando disciplinas...
@@ -195,9 +183,6 @@ export default function DisciplinasPage() {
         <div className="bg-card border border-borda rounded-2xl p-8 text-center space-y-3">
           <p className="text-sm font-semibold text-texto-principal">
             Nenhuma disciplina encontrada.
-          </p>
-          <p className="text-xs text-texto-secundario">
-            Tente ajustar os termos de busca ou cadastre a disciplina faltante.
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -249,11 +234,10 @@ export default function DisciplinasPage() {
         </div>
       )}
 
-      {/* Modal de Adicionar Disciplina */}
+      {/* Modal Interno para Criar Disciplina */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-borda w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            {/* Header Modal */}
             <div className="flex items-center justify-between border-b border-borda pb-3">
               <div>
                 <h2 className="text-base font-extrabold text-texto-principal flex items-center gap-1.5">
@@ -272,18 +256,13 @@ export default function DisciplinasPage() {
               </button>
             </div>
 
-            {/* Aviso de Sucesso Interno */}
             {mensagemSucesso ? (
               <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center space-y-1">
                 <p className="text-xs font-bold text-green-400">
                   ✓ Disciplina enviada para moderação!
                 </p>
-                <p className="text-[11px] text-texto-secundario">
-                  Ela estará visível para todos assim que for aprovada pelos moderadores.
-                </p>
               </div>
             ) : (
-              /* Form Modal */
               <form onSubmit={handleCriarDisciplina} className="space-y-3">
                 {erroMensagem && (
                   <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
@@ -291,7 +270,6 @@ export default function DisciplinasPage() {
                   </div>
                 )}
 
-                {/* Código */}
                 <div>
                   <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                     Código da Disciplina *
@@ -306,7 +284,6 @@ export default function DisciplinasPage() {
                   />
                 </div>
 
-                {/* Nome */}
                 <div>
                   <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                     Nome da Disciplina *
@@ -321,7 +298,6 @@ export default function DisciplinasPage() {
                   />
                 </div>
 
-                {/* Tipo de Disciplina */}
                 <div>
                   <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                     Tipo de Disciplina *
@@ -336,7 +312,6 @@ export default function DisciplinasPage() {
                   </select>
                 </div>
 
-                {/* Período */}
                 <div>
                   <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                     Período <span className="font-normal">(opcional)</span>
@@ -360,7 +335,6 @@ export default function DisciplinasPage() {
                   </select>
                 </div>
 
-                {/* Ementa / Descrição */}
                 <div>
                   <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                     Ementa / Resumo dos Tópicos <span className="font-normal">(opcional)</span>
@@ -374,7 +348,6 @@ export default function DisciplinasPage() {
                   />
                 </div>
 
-                {/* Botão Enviar */}
                 <div className="pt-2">
                   <button
                     type="submit"
