@@ -57,8 +57,9 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
       <div className="bg-card border border-borda rounded-2xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
         
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold"
+          className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-lg font-bold cursor-pointer"
         >
           ✕
         </button>
@@ -90,7 +91,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Prof. Carlos Eduardo"
+                  placeholder="Ex: Fausto De Camargo Júnior"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
@@ -125,49 +126,55 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
                 </div>
               </div>
 
-              {/* Seletor de Nível de Exigência */}
+              {/* Nível de Exigência */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
                   Nível de Exigência *
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {opcoesDificuldade.map((opcao) => (
-                    <button
-                      key={opcao}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, dificuldade: opcao })}
-                      className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
-                        formData.dificuldade === opcao
-                          ? 'bg-card border-azul-texto text-azul-texto shadow-sm'
-                          : 'bg-card border-borda text-texto-secundario hover:border-azul-texto/50'
-                      }`}
-                    >
-                      {opcao}
-                    </button>
-                  ))}
+                  {opcoesDificuldade.map((opcao) => {
+                    const ativo = formData.dificuldade === opcao;
+                    return (
+                      <button
+                        key={opcao}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, dificuldade: opcao }))}
+                        className={`flex-1 min-w-[80px] px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          ativo
+                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.15)]'
+                            : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
+                        }`}
+                      >
+                        {opcao}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Seletor de Cobra Presença */}
+              {/* Cobra Presença */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1.5">
                   Cobra Presença *
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {opcoesPresenca.map((opcao) => (
-                    <button
-                      key={opcao}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, passaLista: opcao })}
-                      className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border text-center ${
-                        formData.passaLista === opcao
-                          ? 'bg-card border-azul-texto text-azul-texto shadow-sm'
-                          : 'bg-card border-borda text-texto-secundario hover:border-azul-texto/50'
-                      }`}
-                    >
-                      {opcao}
-                    </button>
-                  ))}
+                  {opcoesPresenca.map((opcao) => {
+                    const ativo = formData.passaLista === opcao;
+                    return (
+                      <button
+                        key={opcao}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, passaLista: opcao }))}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                          ativo
+                            ? 'bg-azul-texto/10 border-azul-texto text-azul-texto shadow-[0_0_10px_rgba(0,210,255,0.15)]'
+                            : 'bg-fundo border-borda text-texto-secundario hover:border-azul-texto/50 hover:text-texto-principal'
+                        }`}
+                      >
+                        {opcao}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -187,7 +194,7 @@ export default function ModalAdicionarProfessor({ isOpen, onClose }: ModalProps)
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
+                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
                   Enviar para Moderação
                 </button>
