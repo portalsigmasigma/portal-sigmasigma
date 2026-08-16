@@ -13,7 +13,7 @@ export default function Hero() {
         
         {/* Badge do topo */}
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-azul-texto">
-          <span>⚡ De estudante para estudante</span>
+          <span>⚡<strong className="text-texto-principal">Oferecimento:</strong> Não Colegiado</span>
         </div>
 
         {/* Sigmas Iluminados */}
@@ -28,16 +28,16 @@ export default function Hero() {
 
         {/* Subtítulo */}
         <p className="text-xs sm:text-sm text-texto-secundario max-w-xl leading-relaxed">
-          Um repositório <strong className="text-texto-principal">100% independente</strong> — feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado.
+          Um repositório <strong className="text-texto-principal">100% independente</strong> feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado(É sério, eu que fiz, não ela).
           <br />
-          Criado para salvar a pele e facilitar a vida dos eletricistas ceféticos! ⚡ ⚙️
+          Criado para facilitar a vida dos eletricistas ceféticos! ⚡ ⚙️
         </p>
 
         {/* Botões de Ação Principais */}
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2 w-full max-w-3xl">
         <Link
             href="/disciplinas"
-            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:b order-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
         >
             Disciplinas 📚
         </Link>
