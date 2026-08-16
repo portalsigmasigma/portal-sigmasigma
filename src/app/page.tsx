@@ -1,18 +1,36 @@
-// Importação dos componentes principais (sem o Header)
+'use client';
+
+import { useState } from 'react';
 import Hero from '@/components/Hero';
 import Disciplinas from '@/components/Disciplinas';
 
 export default function Home() {
+  // Estado para controlar se as disciplinas estão visíveis ou não
+  const [exibirDisciplinas, setExibirDisciplinas] = useState(false);
+
+  // Função para alternar e rolar suavemente até a seção
+  const handleToggleDisciplinas = () => {
+    const novoEstado = !exibirDisciplinas;
+    setExibirDisciplinas(novoEstado);
+
+    if (novoEstado) {
+      setTimeout(() => {
+        document.getElementById('secao-disciplinas')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
   return (
-    // Container principal flexível ocupando a tela com o fundo azul-marinho
     <div className="min-h-screen bg-fundo flex flex-col">
-      {/* Conteúdo principal sem o cabeçalho fixo no topo */}
-      <main className="flex-1 space-y-6 pb-16">
-        {/* Seção Hero de apresentação */}
-        <Hero />
+      <main className="flex-1 space-y-4 pb-16">
+        {/* Passa as propriedades de estado para o Hero */}
+        <Hero 
+          onToggleDisciplinas={handleToggleDisciplinas} 
+          disciplinasAbertas={exibirDisciplinas} 
+        />
         
-        {/* Grade de Cards de Disciplinas */}
-        <Disciplinas />
+        {/* Renderiza a grade apenas se exibirDisciplinas for true */}
+        <Disciplinas visivel={exibirDisciplinas} />
       </main>
     </div>
   );

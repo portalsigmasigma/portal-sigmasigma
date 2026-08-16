@@ -1,7 +1,7 @@
-// Componente de Cards de Disciplinas estruturado
+// Componente da Grade de Disciplinas (visível via clique)
 import Link from 'next/link';
 
-// Interface com a estrutura de dados para cada disciplina
+// Interface com a estrutura de dados de cada disciplina
 interface Disciplina {
   id: string;
   nome: string;
@@ -11,13 +11,13 @@ interface Disciplina {
   tag: string;
 }
 
-// Lista inicial de disciplinas do curso
+// Lista base de disciplinas do curso
 const listaDisciplinas: Disciplina[] = [
   {
     id: 'calculo',
     nome: 'Cálculo',
     codigo: 'MAT-01',
-    descricao: 'Limites, derivadas, integrais e equações diferenciais para engenharia.',
+    descricao: 'Limites, derivadas, integrais e equações diferenciais.',
     icone: '∫x',
     tag: 'Fundamental',
   },
@@ -25,7 +25,7 @@ const listaDisciplinas: Disciplina[] = [
     id: 'sistemas-digitais',
     nome: 'Sistemas Digitais',
     codigo: 'ELT-02',
-    descricao: 'Álgebra Booleana, portas lógicas, circuitos combinacionais e sequenciais.',
+    descricao: 'Álgebra Booleana, portas lógicas e circuitos digitais.',
     icone: '101',
     tag: 'Hardware',
   },
@@ -33,7 +33,7 @@ const listaDisciplinas: Disciplina[] = [
     id: 'circuitos-eletricos',
     nome: 'Circuitos Elétricos',
     codigo: 'ELT-03',
-    descricao: 'Leis de Kirchhoff, análise nodal/mesh, fasores e potência em CA.',
+    descricao: 'Leis de Kirchhoff, análise nodal e fasores.',
     icone: '⚡',
     tag: 'Núcleo',
   },
@@ -41,15 +41,15 @@ const listaDisciplinas: Disciplina[] = [
     id: 'eletromagnetismo',
     nome: 'Eletromagnetismo',
     codigo: 'FIS-04',
-    descricao: 'Campos elétricos e magnéticos, equações de Maxwell e ondas.',
+    descricao: 'Campos elétricos, magnéticos e equações de Maxwell.',
     icone: '🧲',
     tag: 'Teórica',
   },
   {
     id: 'programacao',
-    nome: 'Programação / Algoritmos',
+    nome: 'Programação',
     codigo: 'COM-05',
-    descricao: 'Lógica de programação, estruturas de dados e métodos numéricos em C/Python.',
+    descricao: 'Algoritmos, estruturas de dados e métodos numéricos.',
     icone: '</>',
     tag: 'Software',
   },
@@ -57,31 +57,35 @@ const listaDisciplinas: Disciplina[] = [
     id: 'sinais-sistemas',
     nome: 'Sinais e Sistemas',
     codigo: 'ELT-06',
-    descricao: 'Sinais contínuos/discretos, transformadas de Fourier, Laplace e Z.',
+    descricao: 'Análise de sinais, Fourier, Laplace e Transformada Z.',
     icone: '∿',
     tag: 'Avançado',
   },
 ];
 
-export default function Disciplinas() {
+interface DisciplinasProps {
+  visivel: boolean;
+}
+
+export default function Disciplinas({ visivel }: DisciplinasProps) {
+  // Se o estado for falso, não renderiza a seção na tela
+  if (!visivel) return null;
+
   return (
-    // Container principal focado em Mobile First
-    <section id="disciplinas" className="w-full py-10 px-4 sm:px-6 max-w-7xl mx-auto">
+    // Animação e container da seção de disciplinas
+    <section id="secao-disciplinas" className="w-full py-8 px-4 sm:px-6 max-w-7xl mx-auto animate-fadeIn">
       
-      {/* Cabeçalho da Seção */}
-      <div className="flex flex-col items-start mb-6 space-y-2">
+      {/* Cabeçalho explicativo */}
+      <div className="flex flex-col items-center text-center mb-6 space-y-2">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-azul-texto">
-          <span>📚 Grade Acadêmica</span>
+          <span>📚 Selecione uma Matéria</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-azul-texto tracking-tight">
-          Disciplinas & Recursos
+          Grade de Disciplinas
         </h2>
-        <p className="text-sm text-texto-secundario max-w-2xl">
-          Selecione uma matéria para acessar materiais, listas salvas e arquivos.
-        </p>
       </div>
 
-      {/* Grade de Cards Responsiva (1 coluna no mobile, expande em telas maiores) */}
+      {/* Grade de Cards Mobile First (1 coluna no celular) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {listaDisciplinas.map((item) => (
           <Link
@@ -90,7 +94,7 @@ export default function Disciplinas() {
             className="group bg-card border border-borda hover:border-azul-texto/50 rounded-2xl p-5 transition-all duration-200 active:scale-[0.98] flex flex-col justify-between shadow-md"
           >
             <div>
-              {/* Ícone e Código da matéria */}
+              {/* Ícone e Código */}
               <div className="flex items-center justify-between mb-3">
                 <span className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center font-bold text-azul-texto text-sm group-hover:glow-sigma transition-all">
                   {item.icone}
@@ -109,11 +113,11 @@ export default function Disciplinas() {
               </p>
             </div>
 
-            {/* Ação no Rodapé do Card */}
+            {/* Link para visualização filtrada */}
             <div className="mt-5 pt-3 border-t border-borda/50 flex items-center justify-between text-xs font-medium text-azul-texto">
               <span>{item.tag}</span>
               <span className="group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                Acessar &rarr;
+                Ver Materiais &rarr;
               </span>
             </div>
           </Link>
