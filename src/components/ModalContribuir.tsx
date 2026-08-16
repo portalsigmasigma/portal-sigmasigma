@@ -1,15 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-
 
 interface ModalContribuirProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Sugestões de disciplinas pré-cadastradas
+// Listas de sugestões pré-cadastradas
 const sugestoesDisciplinas = [
   'Cálculo',
   'Sistemas Digitais',
@@ -18,15 +16,13 @@ const sugestoesDisciplinas = [
   'Geometria Analítica',
 ];
 
-// Sugestões de professores pré-cadastrados
 const sugestoesProfessores = [
   'Dr. Roberto',
   'Dra. Ana Maria',
   'Prof. Carlos',
 ];
 
-// Tipos de materiais disponíveis
-const tiposMaterial = [
+const sugestoesTiposMaterial = [
   'Prova',
   'Lista de Exercícios',
   'Trabalho',
@@ -40,41 +36,24 @@ export default function ModalContribuir({ isOpen, onClose }: ModalContribuirProp
     titulo: '',
     disciplina: '',
     professor: '',
-    tipo: tiposMaterial[0],
+    tipo: '',
     linkDrive: '',
     observacoes: '',
   });
 
   if (!isOpen) return null;
 
-// Dentro do componente ModalContribuir:
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const { error } = await supabase.from('contribuicoes').insert([
-    {
-      titulo: formData.titulo,
-      disciplina: formData.disciplina,
-      professor: formData.professor,
-      tipo: formData.tipo,
-      link_drive: formData.linkDrive,
-      observacoes: formData.observacoes,
-      status: 'pendente',
-    },
-  ]);
+    console.log('Dados prontos para envio:', formData);
 
-  if (error) {
-    console.error('Erro ao enviar:', error);
-    alert('Erro ao enviar o material. Tente novamente!');
-    return;
-  }
-
-  setEnviado(true);
-  setTimeout(() => {
-    setEnviado(false);
-    onClose();
-  }, 2500);
-};
+    setEnviado(true);
+    setTimeout(() => {
+      setEnviado(false);
+      onClose();
+    }, 2500);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -123,8 +102,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
               </div>
 
-              {/* Disciplina (Com autocompletar e digitação livre) e Tipo */}
+              {/* Disciplina e Tipo de Material com mesmo estilo de entrada */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Disciplina */}
                 <div>
                   <label className="block text-xs font-semibold text-texto-secundario mb-1">
                     Disciplina *
@@ -133,10 +113,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                     type="text"
                     required
                     list="disciplinas-sugestoes"
-                    placeholder="Selecione ou digite nova..."
+                    placeholder="Selecione ou digite..."
                     value={formData.disciplina}
                     onChange={(e) => setFormData({ ...formData, disciplina: e.target.value })}
-                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none transition-all"
                   />
                   <datalist id="disciplinas-sugestoes">
                     {sugestoesDisciplinas.map((disc) => (
@@ -145,25 +125,29 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </datalist>
                 </div>
 
+                {/* Tipo de Material */}
                 <div>
                   <label className="block text-xs font-semibold text-texto-secundario mb-1">
                     Tipo de Material *
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    list="tipos-sugestoes"
+                    placeholder="Selecione ou digite..."
                     value={formData.tipo}
                     onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
-                  >
-                    {tiposMaterial.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
+                    className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none transition-all"
+                  />
+                  <datalist id="tipos-sugestoes">
+                    {sugestoesTiposMaterial.map((t) => (
+                      <option key={t} value={t} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 
-              {/* Professor (Com autocompletar e digitação livre) */}
+              {/* Professor */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Professor(a) *
@@ -172,10 +156,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   type="text"
                   required
                   list="professores-sugestoes"
-                  placeholder="Selecione ou digite novo professor..."
+                  placeholder="Selecione ou digite..."
                   value={formData.professor}
                   onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
-                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
+                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none transition-all"
                 />
                 <datalist id="professores-sugestoes">
                   {sugestoesProfessores.map((prof) => (
@@ -195,21 +179,21 @@ const handleSubmit = async (e: React.FormEvent) => {
                   placeholder="https://drive.google.com/..."
                   value={formData.linkDrive}
                   onChange={(e) => setFormData({ ...formData, linkDrive: e.target.value })}
-                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none"
+                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none transition-all"
                 />
               </div>
 
-              {/* Informações Adicionais (Opcional) */}
+              {/* Observações */}
               <div>
                 <label className="block text-xs font-semibold text-texto-secundario mb-1">
                   Informações Adicionais / Observações <span className="text-[10px] text-texto-secundario/70">(opcional)</span>
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Ex: Trabalho valendo 15 pontos, Prova versão B, questões 3 e 4 foram anuladas, etc."
+                  placeholder="Ex: Trabalho valendo 15 pontos, Prova versão B, etc."
                   value={formData.observacoes}
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none resize-none"
+                  className="w-full bg-fundo border border-borda rounded-xl p-2.5 text-xs text-texto-principal focus:border-azul-texto outline-none resize-none transition-all"
                 />
               </div>
 
