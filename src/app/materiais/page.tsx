@@ -120,14 +120,14 @@ export default function PaginaMateriais() {
                   )}
                 </div>
 
-                <a
-                  href={item.link_drive}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-4 py-2 bg-borda/60 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg text-center transition-all"
-                >
-                  Baixar / Abrir
-                </a>
+                    <a
+                    href={item.link_drive}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto px-4 py-2 bg-borda/60 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg text-center transition-all inline-flex items-center justify-center gap-1.5"
+                    >
+                    Abrir Material ↗
+                    </a>
               </div>
             ))}
           </div>
