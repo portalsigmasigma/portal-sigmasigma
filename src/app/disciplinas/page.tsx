@@ -1,150 +1,324 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
-interface ModalAdicionarDisciplinaProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave?: (disciplina: { nome: string; codigo: string; tipo: string; periodo: string }) => void;
+interface Disciplina {
+  id: string;
+  nome: string;
+  codigo: string;
+  periodo?: string;
+  ementa?: string;
 }
 
-export default function ModalAdicionarDisciplina({
-  isOpen,
-  onClose,
-  onSave,
-}: ModalAdicionarDisciplinaProps) {
-  const [nome, setNome] = useState('');
-  const [codigo, setCodigo] = useState('');
-  const [tipo, setTipo] = useState<'Obrigatória' | 'Optativa'>('Obrigatória');
-  const [periodo, setPeriodo] = useState('1º Período');
+export default function DisciplinasPage() {
+  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
+  const [periodoFiltro, setPeriodoFiltro] = useState('todos');
 
-  if (!isOpen) return null;
+  // Modal de Adicionar Disciplina
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoCodigo, setNovoCodigo] = useState('');
+  const [novoPeriodo, setNovoPeriodo] = useState('');
+  const [novaEmenta, setNovaEmenta] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSave) {
-      onSave({ nome, codigo, tipo, periodo });
+  useEffect(() => {
+    fetchDisciplinas();
+  }, []);
+
+  async function fetchDisciplinas() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('disciplinas')
+      .select('*')
+      .order('codigo', { ascending: true });
+
+    if (!error && data) {
+      setDisciplinas(data);
+    } else {
+      console.error('Erro ao carregar disciplinas:', error);
     }
-    onClose();
+    setLoading(false);
+  }
+
+  const handleCriarDisciplina = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!novoNome.trim() || !novoCodigo.trim()) return;
+
+    setEnviando(true);
+
+    const novaDisciplina = {
+      nome: novoNome.trim(),
+      codigo: novoCodigo.trim().toUpperCase(),
+      periodo: novoPeriodo || null,
+      ementa: novaEmenta.trim() || null,
+    };
+
+    const { error } = await supabase.from('disciplinas').insert([novaDisciplina]);
+
+    if (!error) {
+      alert('Disciplina cadastrada com sucesso!');
+      setNovoNome('');
+      setNovoCodigo('');
+      setNovoPeriodo('');
+      setNovaEmenta('');
+      setIsModalOpen(false);
+      fetchDisciplinas();
+    } else {
+      alert('Erro ao cadastrar disciplina: ' + error.message);
+    }
+
+    setEnviando(false);
+  };
+
+  // Filtragem local por texto e período
+  const disciplinasFiltradas = disciplinas.filter((d) => {
+    const atendeBusca =
+      d.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      d.codigo.toLowerCase().includes(busca.toLowerCase());
+
+    const atendePeriodo =
+      periodoFiltro === 'todos' || d.periodo === periodoFiltro;
+
+    return atendeBusca && atendePeriodo;
+  });
+
+  const optionStyle = {
+    backgroundColor: '#121212',
+    color: '#ffffff',
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-card border border-borda w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-5">
-        {/* Cabeçalho */}
-        <div className="flex items-center justify-between border-b border-borda pb-3">
-          <h2 className="text-base font-extrabold text-texto-principal">
-            Cadastrar Nova Disciplina
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-texto-secundario hover:text-texto-principal text-sm transition-colors"
-          >
-            ✕
-          </button>
+    <main className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 space-y-6 max-w-6xl mx-auto">
+      {/* Cabeçalho */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-borda pb-5">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-texto-principal flex items-center gap-2">
+            Disciplinas do Curso <span className="text-azul-texto">📚</span>
+          </h1>
+          <p className="text-xs text-texto-secundario mt-1">
+            Explore as matérias, veja ementas e navegue pelos materiais de estudo.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nome */}
-          <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-              Nome da Disciplina
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Ex: Sistemas Digitais"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
-            />
-          </div>
-
-          {/* Código */}
-          <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-              Código da Disciplina
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Ex: ELC102"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
-            />
-          </div>
-
-          {/* Tipo da Disciplina (Botões com Destaque Visual) */}
-          <div>
-            <label className="block text-[11px] font-semibold text-texto-secundario mb-1.5">
-              Tipo da Disciplina
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setTipo('Obrigatória')}
-                className={`py-2.5 px-4 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                  tipo === 'Obrigatória'
-                    ? 'bg-blue-600/20 text-blue-400 border-blue-500 shadow-sm'
-                    : 'bg-fundo text-texto-secundario border-borda hover:border-gray-500'
-                }`}
-              >
-                {tipo === 'Obrigatória' && '✓ '}Obrigatória
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTipo('Optativa')}
-                className={`py-2.5 px-4 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                  tipo === 'Optativa'
-                    ? 'bg-purple-600/20 text-purple-400 border-purple-500 shadow-sm'
-                    : 'bg-fundo text-texto-secundario border-borda hover:border-gray-500'
-                }`}
-              >
-                {tipo === 'Optativa' && '✓ '}Optativa
-              </button>
-            </div>
-          </div>
-
-          {/* Período (Com correção de contraste no menu suspenso) */}
-          {tipo === 'Obrigatória' && (
-            <div>
-              <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
-                Qual Período?
-              </label>
-              <select
-                value={periodo}
-                onChange={(e) => setPeriodo(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((p) => (
-                  <option key={p} value={`${p}º Período`} className="bg-[#121212] text-white">
-                    {p}º Período
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Ações */}
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-1/2 py-2.5 bg-fundo hover:bg-borda/30 text-texto-principal border border-borda text-xs font-bold rounded-xl transition-all cursor-pointer"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="w-1/2 py-2.5 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
-            >
-              Salvar Disciplina
-            </button>
-          </div>
-        </form>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2.5 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+        >
+          <span>➕</span> Cadastrar Disciplina
+        </button>
       </div>
-    </div>
+
+      {/* Barra de Filtros */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Campo de Pesquisa */}
+        <div className="sm:col-span-2">
+          <input
+            type="text"
+            placeholder="Buscar por nome da matéria ou código (Ex: Cálculo, ELE101)..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="w-full text-xs p-3 rounded-xl bg-card border border-borda text-texto-principal focus:border-azul-texto outline-none"
+          />
+        </div>
+
+        {/* Filtro por Período */}
+        <div>
+          <select
+            value={periodoFiltro}
+            onChange={(e) => setPeriodoFiltro(e.target.value)}
+            className="w-full text-xs p-3 rounded-xl bg-card border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
+          >
+            <option value="todos" style={optionStyle}>
+              Todos os Períodos
+            </option>
+            <option value="1º Período" style={optionStyle}>1º Período</option>
+            <option value="2º Período" style={optionStyle}>2º Período</option>
+            <option value="3º Período" style={optionStyle}>3º Período</option>
+            <option value="4º Período" style={optionStyle}>4º Período</option>
+            <option value="5º Período" style={optionStyle}>5º Período</option>
+            <option value="6º Período" style={optionStyle}>6º Período</option>
+            <option value="7º Período" style={optionStyle}>7º Período</option>
+            <option value="8º Período" style={optionStyle}>8º Período</option>
+            <option value="9º Período" style={optionStyle}>9º Período</option>
+            <option value="10º Período" style={optionStyle}>10º Período</option>
+            <option value="Optativa" style={optionStyle}>Optativas</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Grid de Disciplinas */}
+      {loading ? (
+        <div className="p-12 text-center text-xs text-texto-secundario">
+          Carregando disciplinas...
+        </div>
+      ) : disciplinasFiltradas.length === 0 ? (
+        <div className="bg-card border border-borda rounded-2xl p-8 text-center space-y-3">
+          <p className="text-sm font-semibold text-texto-principal">
+            Nenhuma disciplina encontrada.
+          </p>
+          <p className="text-xs text-texto-secundario">
+            Tente ajustar os termos de busca ou cadastre a disciplina faltante.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-xs text-azul-texto font-bold hover:underline cursor-pointer"
+          >
+            Cadastrar nova matéria
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {disciplinasFiltradas.map((d) => (
+            <Link
+              key={d.id}
+              href={`/disciplinas/${d.id}`}
+              className="bg-card border border-borda hover:border-azul-texto rounded-2xl p-5 space-y-3 transition-all hover:shadow-lg group flex flex-col justify-between"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-extrabold text-azul-texto bg-fundo px-2.5 py-1 rounded-md border border-borda uppercase tracking-wider">
+                    {d.codigo}
+                  </span>
+                  {d.periodo && (
+                    <span className="text-[11px] font-semibold text-texto-secundario">
+                      {d.periodo}
+                    </span>
+                  )}
+                </div>
+
+                <h2 className="text-base font-bold text-texto-principal group-hover:text-azul-texto transition-colors line-clamp-2">
+                  {d.nome}
+                </h2>
+
+                {d.ementa && (
+                  <p className="text-xs text-texto-secundario line-clamp-2 leading-relaxed">
+                    {d.ementa}
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-3 border-t border-borda/60 flex items-center justify-between text-xs text-azul-texto font-bold">
+                <span>Ver detalhes e materiais</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Modal de Adicionar Disciplina */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-borda w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between border-b border-borda pb-3">
+              <div>
+                <h2 className="text-base font-extrabold text-texto-principal flex items-center gap-1.5">
+                  Cadastrar Disciplina <span className="text-azul-texto">+</span>
+                </h2>
+                <p className="text-[11px] text-texto-secundario">
+                  Adicione uma nova disciplina ao catálogo do curso.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                type="button"
+                className="text-texto-secundario hover:text-texto-principal text-sm p-1 rounded-lg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form Modal */}
+            <form onSubmit={handleCriarDisciplina} className="space-y-3">
+              {/* Código */}
+              <div>
+                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                  Código da Disciplina *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: MAT101 ou ELE202"
+                  value={novoCodigo}
+                  onChange={(e) => setNovoCodigo(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none uppercase"
+                />
+              </div>
+
+              {/* Nome */}
+              <div>
+                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                  Nome da Disciplina *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Cálculo Diferencial e Integral I"
+                  value={novoNome}
+                  onChange={(e) => setNovoNome(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none"
+                />
+              </div>
+
+              {/* Período */}
+              <div>
+                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                  Período <span className="font-normal">(opcional)</span>
+                </label>
+                <select
+                  value={novoPeriodo}
+                  onChange={(e) => setNovoPeriodo(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none cursor-pointer"
+                >
+                  <option value="" style={optionStyle}>Não informado / Variado</option>
+                  <option value="1º Período" style={optionStyle}>1º Período</option>
+                  <option value="2º Período" style={optionStyle}>2º Período</option>
+                  <option value="3º Período" style={optionStyle}>3º Período</option>
+                  <option value="4º Período" style={optionStyle}>4º Período</option>
+                  <option value="5º Período" style={optionStyle}>5º Período</option>
+                  <option value="6º Período" style={optionStyle}>6º Período</option>
+                  <option value="7º Período" style={optionStyle}>7º Período</option>
+                  <option value="8º Período" style={optionStyle}>8º Período</option>
+                  <option value="9º Período" style={optionStyle}>9º Período</option>
+                  <option value="10º Período" style={optionStyle}>10º Período</option>
+                  <option value="Optativa" style={optionStyle}>Optativa</option>
+                </select>
+              </div>
+
+              {/* Ementa / Descrição */}
+              <div>
+                <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
+                  Ementa / Resumo dos Tópicos <span className="font-normal">(opcional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Resumo dos tópicos abordados na disciplina..."
+                  value={novaEmenta}
+                  onChange={(e) => setNovaEmenta(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl bg-fundo border border-borda text-texto-principal focus:border-azul-texto outline-none resize-y"
+                />
+              </div>
+
+              {/* Botão Salvar */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={enviando}
+                  className="w-full py-3 bg-destaque hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                >
+                  {enviando ? 'Cadastrando...' : 'Cadastrar Disciplina'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </main>
   );
 }

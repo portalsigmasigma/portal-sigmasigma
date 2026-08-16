@@ -254,6 +254,9 @@ export default function ModalAdicionarProfessor({
               <option value="" style={optionStyle}>
                 Não informado
               </option>
+              <option value="Passa Lista" style={optionStyle}>
+                Passa Lista
+              </option>
               <option value="Sempre" style={optionStyle}>
                 Sempre
               </option>
