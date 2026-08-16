@@ -28,13 +28,12 @@ export default function Hero() {
         {/* Botões de Ação direcionando para páginas dedicadas */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
           {/* Botão 1: Redireciona para a página dedicada de Disciplinas */}
-            // Trecho do Hero.tsx
-            <Link
+          <Link
             href="/disciplinas"
             className="w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-xl bg-destaque hover:bg-blue-600 text-white font-semibold transition-all shadow-lg shadow-cyan-500/10 text-sm text-center active:scale-95"
-            >
+          >
             Explorar Disciplinas 📚
-            </Link>
+          </Link>
 
           {/* Botão 2: Redireciona para o acervo de Materiais */}
           <Link
