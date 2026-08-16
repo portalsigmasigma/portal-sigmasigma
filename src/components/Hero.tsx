@@ -23,7 +23,7 @@ export default function Hero() {
 
         {/* Subtítulo / Disclaimer Humorado com leitura confortável em telas pequenas */}
         <p className="text-sm sm:text-base md:text-lg text-texto-secundario max-w-2xl leading-relaxed">
-          Um repositório <strong className="text-texto-principal">100% independente</strong> — feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado(100% RFree). Criado para salvar a pele e facilitar a vida dos eletricistas ceféticos! ⚡⚙️
+          Um repositório <strong className="text-texto-principal">100% independente</strong> — feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado(100% RFree). Criado para facilitar a vida dos eletricistas ceféticos! ⚡⚙️
         </p>
 
         {/* Botões de Ação (CTAs) em largura total no celular (w-full) com área de toque ampla */}
