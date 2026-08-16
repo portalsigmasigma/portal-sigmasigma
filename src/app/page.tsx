@@ -1,23 +1,19 @@
+// Importação dos componentes isolados
 import Header from '@/components/Header';
+import Hero from '@/components/Hero';
 
 export default function Home() {
   return (
+    // Estrutura principal flexível ocupando toda a altura da tela
     <div className="min-h-screen bg-fundo flex flex-col">
-      {/* Componente do Header isolado */}
+      {/* 1. Barra de navegação do topo */}
       <Header />
 
-      {/* Conteúdo temporário do centro */}
-      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="text-6xl font-black tracking-tighter glow-sigma mb-4">
-          ΣΣ
-        </div>
-        <h1 className="text-3xl font-extrabold text-azul-texto">
-          Portal de <span className="glow-sigma">Σ</span>ngenharia <span className="glow-sigma">Σ</span>létrica
-        </h1>
-        <p className="text-texto-secundario max-w-md mt-2">
-          Header integrado com sucesso.
-        </p>
+      {/* 2. Conteúdo central da página */}
+      <main className="flex-1">
+        {/* Componente Hero com apresentação e aviso humorado */}
+        <Hero />
       </main>
     </div>
   );
-} 
+}
