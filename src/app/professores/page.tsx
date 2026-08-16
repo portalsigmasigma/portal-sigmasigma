@@ -27,10 +27,10 @@ export default function ProfessoresPage() {
   const fetchProfessores = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('professores')
-      .select('*')
-      .eq('status', 'aprovado')
-      .order('nome', { ascending: true });
+    .from('professores')
+    .select('*')
+    .eq('status', 'aprovado') // traz apenas os aprovados
+    .order('nome', { ascending: true });
 
     if (error) {
       console.error('Erro ao buscar professores:', error);
