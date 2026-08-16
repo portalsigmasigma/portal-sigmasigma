@@ -33,32 +33,39 @@ export default function Hero() {
           Criado para salvar a pele e facilitar a vida dos eletricistas ceféticos! ⚡ ⚙️
         </p>
 
-        {/* Botões de Ação */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
+        {/* Botões de Ação Principais */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2 w-full max-w-2xl">
           <Link
             href="/disciplinas"
-            className="w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-xl bg-destaque hover:bg-blue-600 text-white font-semibold transition-all shadow-lg shadow-cyan-500/10 text-sm text-center active:scale-95"
+            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-destaque hover:bg-blue-600 text-white font-semibold transition-all shadow-lg shadow-cyan-500/10 text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
           >
-            Explorar Disciplinas 📚
+            Disciplinas 📚
           </Link>
 
           <Link
             href="/professores"
-            className="w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-sm text-center active:scale-95"
+            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
           >
             Professores 👨‍🏫
           </Link>
 
+          <Link
+            href="/materiais"
+            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+          >
+            Todos os Materiais 📂
+          </Link>
+
           <button
             onClick={() => setModalAberto(true)}
-            className="w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-azul-texto font-semibold transition-all text-sm text-center active:scale-95"
+            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-azul-texto font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
           >
             Contribuir 📥
           </button>
         </div>
       </section>
 
-      {/* Renderização do Modal */}
+      {/* Modal de Contribuição */}
       <ModalContribuir isOpen={modalAberto} onClose={() => setModalAberto(false)} />
     </>
   );
