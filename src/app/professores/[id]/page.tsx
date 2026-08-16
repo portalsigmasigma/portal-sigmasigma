@@ -10,9 +10,9 @@ interface Professor {
   nome: string;
   email?: string;
   sala?: string;
-  passa_lista?: string;
-  dificuldade?: string;
-  resumo?: string;
+  presenca?: string;
+  exigencia?: string;
+  dicas?: string;
 }
 
 interface Material {
@@ -91,19 +91,25 @@ export default function DetalhesProfessorPage({
 
   return (
     <main className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 space-y-6 max-w-5xl mx-auto">
-      <Link href="/professores" className="text-xs text-azul-texto hover:underline inline-flex items-center gap-1 font-semibold">
-        ← Voltar para Professores
-      </Link>
+      <div>
+        <Link
+          href="/professores"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-texto-secundario hover:text-azul-texto transition-colors group"
+        >
+          <span className="group-hover:-translate-x-1 transition-transform">←</span>
+          <span>Voltar para Professores</span>
+        </Link>
+      </div>
 
       {/* Header do Perfil */}
-      <div className="bg-card border border-borda rounded-2xl p-6 shadow-md space-y-4">
+      <div className="bg-card border border-borda rounded-2xl p-6 sm:p-8 shadow-lg space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-texto-principal">
+            <h1 className="text-2xl sm:text-3xl font-black text-texto-principal">
               {professor.nome}
             </h1>
-            <p className="text-xs text-texto-secundario mt-1">
-              📧 {professor.email || 'E-mail não informado'}
+            <p className="text-xs text-texto-secundario mt-1 flex items-center gap-1.5">
+              ✉️ <span>{professor.email || 'E-mail não informado'}</span>
             </p>
           </div>
 
@@ -116,51 +122,56 @@ export default function DetalhesProfessorPage({
         </div>
 
         {/* Detalhes Rápidos */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div className="bg-fundo border border-borda rounded-xl p-3.5 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-texto-secundario tracking-wider">
-              📌 Sala / Prédio
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-fundo/60 border border-borda/80 p-3.5 rounded-xl space-y-1">
+            <span className="text-[10px] uppercase font-extrabold text-texto-secundario tracking-wider flex items-center gap-1">
+              📌 SALA / PRÉDIO
             </span>
-            <p className="text-xs font-semibold text-texto-principal">
+            <p className="text-xs font-bold text-texto-principal">
               {professor.sala || 'Não informada'}
             </p>
           </div>
 
-          <div className="bg-fundo border border-borda rounded-xl p-3.5 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-texto-secundario tracking-wider">
-              ⚡ Nível de Exigência
+          <div className="bg-fundo/60 border border-borda/80 p-3.5 rounded-xl space-y-1">
+            <span className="text-[10px] uppercase font-extrabold text-texto-secundario tracking-wider flex items-center gap-1">
+              ⚡ NÍVEL DE EXIGÊNCIA
             </span>
-            <p className="text-xs font-semibold text-texto-principal">
-              {professor.dificuldade || 'Não informado'}
+            <p className="text-xs font-bold text-texto-principal">
+              {professor.exigencia || 'Não informado'}
             </p>
           </div>
 
-          <div className="bg-fundo border border-borda rounded-xl p-3.5 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-texto-secundario tracking-wider">
-              📝 Cobra Presença
+          <div className="bg-fundo/60 border border-borda/80 p-3.5 rounded-xl space-y-1">
+            <span className="text-[10px] uppercase font-extrabold text-texto-secundario tracking-wider flex items-center gap-1">
+              📝 COBRA PRESENÇA
             </span>
-            <p className="text-xs font-semibold text-texto-principal">
-              {professor.passa_lista || 'Não informado'}
+            <p className="text-xs font-bold text-texto-principal">
+              {professor.presenca || 'Não informado'}
             </p>
           </div>
         </div>
 
-        {professor.resumo && (
-          <div className="bg-fundo border border-borda rounded-xl p-4 text-xs text-texto-secundario space-y-1">
-            <span className="font-bold text-texto-principal">💡 Dicas e Visão Geral:</span>
-            <p>{professor.resumo}</p>
+        {/* Dicas e Visão Geral */}
+        {professor.dicas && (
+          <div className="pt-4 border-t border-borda space-y-2">
+            <h2 className="text-xs font-extrabold text-azul-texto uppercase tracking-wider flex items-center gap-1.5">
+              💡 Dicas e Visão Geral
+            </h2>
+            <div className="bg-fundo/40 border border-borda/60 rounded-xl p-4 text-xs text-texto-principal leading-relaxed whitespace-pre-line">
+              {professor.dicas}
+            </div>
           </div>
         )}
       </div>
 
       {/* Seção de Materiais Associados */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-texto-principal flex items-center gap-2">
-          <span>📚</span> Materiais deste Professor ({materiais.length})
+        <h2 className="text-sm font-extrabold text-texto-principal flex items-center gap-2">
+          <span>📚</span> Materiais deste Professor <span>({materiais.length})</span>
         </h2>
 
         {materiais.length === 0 ? (
-          <div className="bg-card border border-borda rounded-2xl p-6 text-center space-y-2">
+          <div className="bg-card border border-borda rounded-2xl p-8 text-center space-y-2">
             <p className="text-xs text-texto-secundario">
               Nenhum material cadastrado especificamente para este professor ainda.
             </p>
@@ -174,20 +185,20 @@ export default function DetalhesProfessorPage({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {materiais.map((m) => (
-              <div key={m.id} className="bg-card border border-borda rounded-2xl p-4 space-y-3">
+              <div key={m.id} className="bg-card border border-borda rounded-2xl p-5 space-y-3 shadow-sm hover:border-azul-texto transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-[10px] font-bold text-azul-texto uppercase tracking-wider">
+                    <span className="text-[10px] font-extrabold text-azul-texto uppercase tracking-wider bg-fundo px-2 py-0.5 rounded border border-borda">
                       {m.disciplina} • {m.tipo}
                     </span>
-                    <h3 className="text-sm font-bold text-texto-principal mt-0.5">
+                    <h3 className="text-sm font-bold text-texto-principal mt-2">
                       {m.titulo}
                     </h3>
                   </div>
                 </div>
 
                 {m.descricao && (
-                  <p className="text-xs text-texto-secundario line-clamp-2">
+                  <p className="text-xs text-texto-secundario line-clamp-2 leading-relaxed">
                     {m.descricao}
                   </p>
                 )}
