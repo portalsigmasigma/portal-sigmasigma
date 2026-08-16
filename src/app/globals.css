@@ -1,26 +1,35 @@
+/* Importação do Tailwind CSS v4 */
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Fundo noturno levemente azulado/arroxeado (sem tom de preto puro) */
+  --color-fundo: #070A13;
+  
+  /* Cards em tom azul-escuro com profundidade */
+  --color-card: #10172A;
+  
+  /* Borda suave e sutil para os elementos */
+  --color-borda: #1E293B;
+  
+  /* Azul base do texto do título */
+  --color-azul-texto: #60A5FA;
+  
+  /* Azul elétrico vibrante para o destaque dos sigmas */
+  --color-sigma-neon: #00E5FF;
+  
+  /* Cor dos textos secundários */
+  --color-texto-principal: #F1F5F9;
+  --color-texto-secundario: #94A3B8;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-fundo);
+  color: var(--color-texto-principal);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Efeito de brilho neon para os sigmas (Σ) */
+.glow-sigma {
+  color: var(--color-sigma-neon);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.7), 0 0 25px rgba(0, 229, 255, 0.4);
 }

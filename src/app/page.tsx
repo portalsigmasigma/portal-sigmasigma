@@ -1,28 +1,35 @@
-// Exportamos a função principal da página (Home) que o Next.js renderiza na rota raiz ("/")
+// Página inicial com a logo ΣΣ neon acima do título
 export default function Home() {
   return (
-    // Elemento principal (<main>) estilizado com Tailwind CSS:
-    // flex, flex-col, items-center, justify-center: Centralizam todo o conteúdo vertical e horizontalmente.
-    // min-h-screen: Garante altura mínima igual a 100% da tela do usuário.
-    // bg-slate-900 text-slate-100: Aplica fundo escuro e texto claro.
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-900 text-slate-100">
+    // Container principal centralizado com fundo azul-marinho (#070A13)
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-fundo">
       
-      {/* Contêiner interno flexível centralizando os elementos com espaçamento entre eles (space-y-6) */}
-      <div className="flex flex-col items-center text-center space-y-6 max-w-2xl">
+      {/* Container de conteúdo com espaçamento vertical */}
+      <div className="flex flex-col items-center text-center space-y-6 max-w-3xl">
         
-        {/* Título principal do portal */}
-        <h1 className="text-5xl font-extrabold tracking-tight text-blue-400">
-          ΣΣ — Portal da Engenharia Elétrica
+        {/* Logo ΣΣ em destaque com o efeito de brilho neon azul/ciano */}
+        <div className="text-7xl sm:text-8xl font-black tracking-tighter glow-sigma">
+          ΣΣ
+        </div>
+
+        {/* Título principal em tom azul com os sigmas brilhantes */}
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-azul-texto">
+          Portal de <span className="glow-sigma">Σ</span>ngenharia <span className="glow-sigma">Σ</span>létrica
         </h1>
         
-        {/* Descrição resumida da plataforma */}
-        <p className="text-lg text-slate-300">
-          Bem-vindo ao portal acadêmico! Aqui organizamos e facilitamos o acesso a informações, disciplinas, materiais e recursos da graduação.
+        {/* Subtítulo descritivo */}
+        <p className="text-base sm:text-lg text-texto-secundario max-w-xl">
+          Plataforma tecnológica para organizar e facilitar o acesso a informações, materiais e recursos acadêmicos.
         </p>
 
-        {/* Tag indicativa da Fase 1 */}
-        <div className="px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-full text-blue-300 text-sm font-medium">
-          Fase 1 — Fundação Concluída
+        {/* Card em tom azul-escuro indicando a fase atual */}
+        <div className="px-6 py-4 bg-card border border-borda rounded-xl shadow-lg mt-4">
+          <p className="text-sm font-medium text-texto-principal">
+            Fase 3 — Identidade Visual
+          </p>
+          <p className="text-xs text-texto-secundario mt-1">
+            Logo <span className="glow-sigma font-bold">ΣΣ</span> brilhante aplicada com sucesso.
+          </p>
         </div>
 
       </div>
