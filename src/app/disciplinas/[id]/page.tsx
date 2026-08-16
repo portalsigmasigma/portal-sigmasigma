@@ -17,16 +17,6 @@ interface Professor {
   nome: string;
 }
 
-// Disciplinas padrão para quando o banco ainda não tiver dados cadastrados
-const DISCIPLINAS_PADRAO: Disciplina[] = [
-  { id: '1', nome: 'Cálculo', codigo: 'MAT-01', tipo: 'Obrigatória', periodo: '1º Período' },
-  { id: '2', nome: 'Sistemas Digitais', codigo: 'ELT-02', tipo: 'Obrigatória', periodo: '2º Período' },
-  { id: '3', nome: 'Circuitos Elétricos', codigo: 'ELT-03', tipo: 'Obrigatória', periodo: '3º Período' },
-  { id: '4', nome: 'Eletromagnetismo', codigo: 'FIS-04', tipo: 'Obrigatória', periodo: '4º Período' },
-  { id: '5', nome: 'Programação / Algoritmos', codigo: 'COM-05', tipo: 'Obrigatória', periodo: '1º Período' },
-  { id: '6', nome: 'Sinais e Sistemas', codigo: 'ELT-06', tipo: 'Obrigatória', periodo: '5º Período' },
-];
-
 export default function PaginaDisciplinas() {
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
   const [professores, setProfessores] = useState<Professor[]>([]);
@@ -55,7 +45,7 @@ export default function PaginaDisciplinas() {
   const [linkDrive, setLinkDrive] = useState('');
   const [observacoes, setObservacoes] = useState('');
 
-  // Buscar Disciplinas e Professores
+  // Buscar Disciplinas e Professores do Banco de Dados
   async function carregarDados() {
     setCarregando(true);
 
@@ -64,11 +54,10 @@ export default function PaginaDisciplinas() {
       supabase.from('professores').select('id, nome').order('nome', { ascending: true }),
     ]);
 
-    // Se houver dados no banco, usa eles; caso contrário, carrega as padrão
-    if (!resDisc.error && resDisc.data && resDisc.data.length > 0) {
+    if (!resDisc.error && resDisc.data) {
       setDisciplinas(resDisc.data);
     } else {
-      setDisciplinas(DISCIPLINAS_PADRAO);
+      setDisciplinas([]);
     }
 
     if (!resProf.error && resProf.data) {
@@ -106,14 +95,23 @@ export default function PaginaDisciplinas() {
       setModalDisciplinaAberto(false);
       carregarDados();
     } else {
-      // Se a tabela 'disciplinas' ainda não existir no Supabase, adiciona localmente na tela
-      setDisciplinas((prev) => [...prev, { ...novaDisciplina, id: Date.now().toString() }]);
-      setNomeDisciplina('');
-      setCodigoDisciplina('');
-      setModalDisciplinaAberto(false);
+      alert('Erro ao cadastrar disciplina: ' + error.message);
     }
 
     setEnviandoDisciplina(false);
+  }
+
+  // Deletar Disciplina
+  async function handleDeletarDisciplina(id: string) {
+    if (!confirm('Deseja realmente remover esta disciplina?')) return;
+
+    const { error } = await supabase.from('disciplinas').delete().eq('id', id);
+
+    if (!error) {
+      carregarDados();
+    } else {
+      alert('Erro ao remover disciplina: ' + error.message);
+    }
   }
 
   // Abrir Modal de Relacionar Material
@@ -193,7 +191,7 @@ export default function PaginaDisciplinas() {
             Grade de Disciplinas
           </h1>
           <p className="text-xs sm:text-sm text-texto-secundario">
-            Lista de matérias do curso com opção de cadastrar e vincular novos materiais.
+            Cadastre disciplinas e relacione materiais diretamente.
           </p>
         </div>
 
@@ -214,7 +212,7 @@ export default function PaginaDisciplinas() {
           ))}
         </div>
 
-        {/* Lista de Disciplinas (Sem os cards antigos) */}
+        {/* Lista de Disciplinas */}
         {carregando ? (
           <div className="text-center py-12 text-xs text-texto-secundario animate-pulse">
             Carregando disciplinas... ⚡
@@ -227,7 +225,6 @@ export default function PaginaDisciplinas() {
                 className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-borda/20 transition-all"
               >
                 <div className="flex items-center gap-3">
-                  {/* Código da Matéria */}
                   <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-borda/40 text-azul-texto shrink-0">
                     {item.codigo}
                   </span>
@@ -244,7 +241,6 @@ export default function PaginaDisciplinas() {
                   </div>
                 </div>
 
-                {/* Tag de Tipo e Botão de Material */}
                 <div className="flex items-center gap-2 self-start sm:self-center">
                   <span
                     className={`text-[10px] font-bold px-2.5 py-0.5 rounded border ${
@@ -262,18 +258,26 @@ export default function PaginaDisciplinas() {
                   >
                     <span>📎</span> Relacionar Material
                   </button>
+
+                  <button
+                    onClick={() => handleDeletarDisciplina(item.id)}
+                    className="p-1.5 hover:bg-red-500/20 text-texto-secundario hover:text-red-400 rounded-lg transition-all text-xs"
+                    title="Excluir Disciplina"
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="bg-card border border-borda rounded-xl p-8 text-center text-xs text-texto-secundario">
-            Nenhuma disciplina encontrada para o filtro selecionado.
+            Nenhuma disciplina cadastrada. Clique em "+ Nova Disciplina" para adicionar.
           </div>
         )}
       </div>
 
-      {/* MODAL 1: Cadastro de Nova Disciplina */}
+      {/* MODAL: Cadastro de Disciplina */}
       {modalDisciplinaAberto && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-borda w-full max-w-md rounded-2xl p-6 shadow-xl space-y-4">
@@ -388,7 +392,7 @@ export default function PaginaDisciplinas() {
         </div>
       )}
 
-      {/* MODAL 2: Relacionar Material à Disciplina */}
+      {/* MODAL: Relacionar Material */}
       {modalMaterialAberto && disciplinaSelecionada && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-borda w-full max-w-md rounded-2xl p-6 shadow-xl space-y-4">
