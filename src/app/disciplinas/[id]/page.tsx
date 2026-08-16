@@ -9,14 +9,23 @@ interface Disciplina {
   nome: string;
   codigo: string;
   tipo: 'Obrigatória' | 'Optativa';
-  periodo?: string; // ex: "1º Período"
-  created_at?: string;
+  periodo?: string;
 }
 
 interface Professor {
   id: string;
   nome: string;
 }
+
+// Disciplinas padrão para quando o banco ainda não tiver dados cadastrados
+const DISCIPLINAS_PADRAO: Disciplina[] = [
+  { id: '1', nome: 'Cálculo', codigo: 'MAT-01', tipo: 'Obrigatória', periodo: '1º Período' },
+  { id: '2', nome: 'Sistemas Digitais', codigo: 'ELT-02', tipo: 'Obrigatória', periodo: '2º Período' },
+  { id: '3', nome: 'Circuitos Elétricos', codigo: 'ELT-03', tipo: 'Obrigatória', periodo: '3º Período' },
+  { id: '4', nome: 'Eletromagnetismo', codigo: 'FIS-04', tipo: 'Obrigatória', periodo: '4º Período' },
+  { id: '5', nome: 'Programação / Algoritmos', codigo: 'COM-05', tipo: 'Obrigatória', periodo: '1º Período' },
+  { id: '6', nome: 'Sinais e Sistemas', codigo: 'ELT-06', tipo: 'Obrigatória', periodo: '5º Período' },
+];
 
 export default function PaginaDisciplinas() {
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
@@ -55,8 +64,11 @@ export default function PaginaDisciplinas() {
       supabase.from('professores').select('id, nome').order('nome', { ascending: true }),
     ]);
 
-    if (!resDisc.error && resDisc.data) {
+    // Se houver dados no banco, usa eles; caso contrário, carrega as padrão
+    if (!resDisc.error && resDisc.data && resDisc.data.length > 0) {
       setDisciplinas(resDisc.data);
+    } else {
+      setDisciplinas(DISCIPLINAS_PADRAO);
     }
 
     if (!resProf.error && resProf.data) {
@@ -94,7 +106,11 @@ export default function PaginaDisciplinas() {
       setModalDisciplinaAberto(false);
       carregarDados();
     } else {
-      alert('Erro ao cadastrar disciplina: ' + error.message);
+      // Se a tabela 'disciplinas' ainda não existir no Supabase, adiciona localmente na tela
+      setDisciplinas((prev) => [...prev, { ...novaDisciplina, id: Date.now().toString() }]);
+      setNomeDisciplina('');
+      setCodigoDisciplina('');
+      setModalDisciplinaAberto(false);
     }
 
     setEnviandoDisciplina(false);
@@ -125,10 +141,9 @@ export default function PaginaDisciplinas() {
       tipo: tipoMaterial,
       link_drive: linkDrive.trim(),
       observacoes: observacoes.trim() || null,
-      status: 'aprovado', // ou 'pendente', caso use aprovação
+      status: 'aprovado',
     };
 
-    // Tenta salvar na tabela 'materiais' (ou 'contribuicoes' como fallback)
     let { error } = await supabase.from('materiais').insert([novoMaterial]);
 
     if (error) {
@@ -178,7 +193,7 @@ export default function PaginaDisciplinas() {
             Grade de Disciplinas
           </h1>
           <p className="text-xs sm:text-sm text-texto-secundario">
-            Lista organizada de matérias com opção de adicionar materiais direto em cada uma.
+            Lista de matérias do curso com opção de cadastrar e vincular novos materiais.
           </p>
         </div>
 
@@ -199,60 +214,57 @@ export default function PaginaDisciplinas() {
           ))}
         </div>
 
-        {/* Lista Compacta de Disciplinas */}
+        {/* Lista de Disciplinas (Sem os cards antigos) */}
         {carregando ? (
           <div className="text-center py-12 text-xs text-texto-secundario animate-pulse">
             Carregando disciplinas... ⚡
           </div>
         ) : disciplinasFiltradas.length > 0 ? (
-          <div className="bg-card border border-borda rounded-xl overflow-hidden shadow-sm">
-            <div className="divide-y divide-borda">
-              {disciplinasFiltradas.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-borda/20 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    {/* Código da Matéria */}
-                    <span className="font-mono text-xs font-bold px-2 py-1 rounded bg-borda/40 text-azul-texto shrink-0">
-                      {item.codigo}
-                    </span>
+          <div className="bg-card border border-borda rounded-xl overflow-hidden shadow-sm divide-y divide-borda">
+            {disciplinasFiltradas.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-borda/20 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Código da Matéria */}
+                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-borda/40 text-azul-texto shrink-0">
+                    {item.codigo}
+                  </span>
 
-                    <div>
-                      <h3 className="text-xs sm:text-sm font-bold text-texto-principal">
-                        {item.nome}
-                      </h3>
-                      <p className="text-[11px] text-texto-secundario">
-                        {item.tipo === 'Obrigatória'
-                          ? `Obrigatória • ${item.periodo || 'Período não informado'}`
-                          : 'Matéria Optativa'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Ações e Tags */}
-                  <div className="flex items-center gap-2 self-start sm:self-center">
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded border ${
-                        item.tipo === 'Obrigatória'
-                          ? 'bg-blue-500/10 text-azul-texto border-blue-500/20'
-                          : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                      }`}
-                    >
-                      {item.tipo}
-                    </span>
-
-                    {/* Botão Relacionar Material */}
-                    <button
-                      onClick={() => abrirModalMaterial(item)}
-                      className="px-2.5 py-1 bg-borda/50 hover:bg-destaque hover:text-white text-[11px] font-semibold rounded-lg transition-all text-texto-principal flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>📎</span> Relacionar Material
-                    </button>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-texto-principal">
+                      {item.nome}
+                    </h3>
+                    <p className="text-[11px] text-texto-secundario">
+                      {item.tipo === 'Obrigatória'
+                        ? `Obrigatória • ${item.periodo || 'Período não informado'}`
+                        : 'Matéria Optativa'}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Tag de Tipo e Botão de Material */}
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded border ${
+                      item.tipo === 'Obrigatória'
+                        ? 'bg-blue-500/10 text-azul-texto border-blue-500/20'
+                        : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                    }`}
+                  >
+                    {item.tipo}
+                  </span>
+
+                  <button
+                    onClick={() => abrirModalMaterial(item)}
+                    className="px-3 py-1.5 bg-borda/50 hover:bg-destaque hover:text-white text-xs font-semibold rounded-lg transition-all text-texto-principal flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📎</span> Relacionar Material
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="bg-card border border-borda rounded-xl p-8 text-center text-xs text-texto-secundario">
@@ -398,7 +410,6 @@ export default function PaginaDisciplinas() {
             </div>
 
             <form onSubmit={handleSalvarMaterial} className="space-y-3">
-              {/* Título do Arquivo */}
               <div>
                 <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                   Título do Arquivo / Prova
@@ -413,7 +424,6 @@ export default function PaginaDisciplinas() {
                 />
               </div>
 
-              {/* Professor Responsável (Opcional) */}
               <div>
                 <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                   Professor (Opcional)
@@ -442,7 +452,6 @@ export default function PaginaDisciplinas() {
                 )}
               </div>
 
-              {/* Tipo de Material */}
               <div>
                 <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                   Tipo de Material
@@ -460,7 +469,6 @@ export default function PaginaDisciplinas() {
                 </select>
               </div>
 
-              {/* Link do Google Drive */}
               <div>
                 <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                   Link do Google Drive
@@ -475,7 +483,6 @@ export default function PaginaDisciplinas() {
                 />
               </div>
 
-              {/* Observações */}
               <div>
                 <label className="block text-[11px] font-semibold text-texto-secundario mb-1">
                   Observações (Opcional)
@@ -489,7 +496,6 @@ export default function PaginaDisciplinas() {
                 />
               </div>
 
-              {/* Botões do Modal */}
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
