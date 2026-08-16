@@ -58,7 +58,17 @@ export default function ProfessoresPage() {
   };
 
   return (
-    <main className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 space-y-6">
+    <main className="min-h-screen bg-fundo text-texto-principal p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
+      {/* Botão para voltar ao Início */}
+      <div>
+        <Link
+          href="/"
+          className="inline-flex items-center space-x-2 text-xs font-semibold text-texto-secundario hover:text-texto-principal transition-colors bg-card border border-borda px-3 py-1.5 rounded-xl shadow-sm"
+        >
+          <span>← Voltar para o Início</span>
+        </Link>
+      </div>
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-borda pb-4">
         <div>
           <h1 className="text-2xl font-black text-texto-principal flex items-center gap-2">
