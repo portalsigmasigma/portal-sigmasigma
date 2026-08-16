@@ -26,6 +26,11 @@ body {
   background-color: var(--color-fundo);
   color: var(--color-texto-principal);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Trava vazamentos de tela no mobile */
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
 }
 
 /* Efeito de brilho neon para os sigmas (Σ) */
