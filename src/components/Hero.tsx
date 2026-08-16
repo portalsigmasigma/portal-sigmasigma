@@ -28,7 +28,7 @@ export default function Hero() {
 
         {/* Subtítulo */}
         <p className="text-xs sm:text-sm text-texto-secundario max-w-xl leading-relaxed">
-          Um repositório <strong className="text-texto-principal">100% independente</strong> feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado(É sério, eu que fiz, não ela).
+          Um repositório <strong className="text-texto-principal">100% independente</strong> feito por pura vontade de sobreviver ao curso, sem qualquer vínculo, benção ou dedo da representação do colegiado(É sério, eu que fiz).
           <br />
           Criado para facilitar a vida dos eletricistas ceféticos! ⚡ ⚙️
         </p>
