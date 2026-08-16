@@ -34,34 +34,34 @@ export default function Hero() {
         </p>
 
         {/* Botões de Ação Principais */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2 w-full max-w-2xl">
-          <Link
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2 w-full max-w-3xl">
+        <Link
             href="/disciplinas"
-            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-destaque hover:bg-blue-600 text-white font-semibold transition-all shadow-lg shadow-cyan-500/10 text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
-          >
+            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+        >
             Disciplinas 📚
-          </Link>
+        </Link>
 
-          <Link
+        <Link
             href="/professores"
-            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
-          >
+            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+        >
             Professores 👨‍🏫
-          </Link>
+        </Link>
 
-          <Link
+        <Link
             href="/materiais"
-            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
-          >
+            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-texto-principal font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+        >
             Todos os Materiais 📂
-          </Link>
+        </Link>
 
-          <button
+        <button
             onClick={() => setModalAberto(true)}
-            className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-card border border-borda hover:border-azul-texto text-azul-texto font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
-          >
+            className="px-5 py-2.5 rounded-xl bg-card border border-borda hover:border-azul-texto text-azul-texto font-semibold transition-all text-xs sm:text-sm text-center active:scale-95 whitespace-nowrap"
+        >
             Contribuir 📥
-          </button>
+        </button>
         </div>
       </section>
 
